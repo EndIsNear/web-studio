@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -46,7 +45,13 @@ func (h *HTTPServer) createNewServer(addr string) {
 		h.serveHomapage(res, req, "ui/index.html")
 	})
 	mux.HandleFunc("/result/index.html", func(res http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(res, "You can add items here! Can you?!\n")
+		h.siteBuilder.ServeHTML(res, req)
+	})
+	mux.HandleFunc("/result/style.css", func(res http.ResponseWriter, req *http.Request) {
+		h.siteBuilder.ServeCSS(res, req)
+	})
+	mux.HandleFunc("/result/script.js", func(res http.ResponseWriter, req *http.Request) {
+		h.siteBuilder.ServeJS(res, req)
 	})
 
 	mux.Handle("/styles/", http.StripPrefix("/styles/", http.FileServer(http.Dir("./ui/styles"))))

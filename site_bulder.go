@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 )
 
@@ -21,42 +22,35 @@ type SiteBuilder struct {
 }
 
 func (b *SiteBuilder) Init() {
-	// b.outputDir = outputDir
-
-	// b.outputHtml = filepath.Join(b.outputDir, "/index.html")
-	// b.outputCSS = filepath.Join(b.outputDir, "/styles/main.css")
-	// b.outputJS = filepath.Join(b.outputDir, "/scripts/script.js")
-	// b.saveFile = filepath.Join(b.outputDir, "save.tmp")
-	// fmt.Println("Output HTML file:", b.outputHtml)
-	// fmt.Println("Output CSS file:", b.outputCSS)
-	// fmt.Println("Output JS file:", b.outputJS)
-	// fmt.Println("Save file::", b.saveFile)
+	b.bgColor = ""
 }
 
-func (b *SiteBuilder) UpdateHTML() {
-	// file, err := os.Create(b.outputHtml)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer file.Close()
+func (b *SiteBuilder) ServeHTML(res http.ResponseWriter, req *http.Request) {
+	header := `<!DOCTYPE html><html lang="en"><head><script src="script.js"></script><link rel="stylesheet" href="style.css"><title>Idle game 2k22</title></head><body>`
+	body := `<h1>You can add items here! Can you?!</h1>`
+	footer := `</body></html>`
 
-	// file.WriteString(`<!DOCTYPE html><html lang="en"><head><script src="scripts/script.js"></script><link rel="stylesheet" href="styles/main.css"><title>Idle game 2k22</title></head><body>`)
-	// for _, elem := range b.htmlElements {
-	// 	file.WriteString(elem.ToString())
-	// }
-	// file.WriteString(`</body></html>`)
+	if len(b.htmlElements) > 0 {
+		body = ""
+	}
+	for _, elem := range b.htmlElements {
+		body += elem.ToString()
+	}
+
+	fmt.Fprintf(res, "%s%s%s", header, body, footer)
 }
 
-func (b *SiteBuilder) UpdateCSS() {
-	// file, err := os.Create(b.outputCSS)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer file.Close()
+func (b *SiteBuilder) ServeCSS(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "text/css")
+	header := `body{ background-color: `
+	body := b.bgColor
+	footer := `; }`
 
-	// file.WriteString(`body{background-color:`)
-	// file.WriteString(b.bgColor)
-	// file.WriteString(`;}`)
+	fmt.Fprintf(res, "%s%s%s", header, body, footer)
+}
+
+func (b *SiteBuilder) ServeJS(res http.ResponseWriter, req *http.Request) {
+	// fmt.Fprintf(res, "You can add items here! Can you?!\n")
 }
 
 func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
@@ -73,7 +67,7 @@ func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
 	default:
 		log.Printf("The given %s HTMLElementJSON type can't be found", request.ElementType)
 	}
-	b.UpdateHTML()
+	// b.UpdateHTML()
 }
 
 func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
@@ -91,7 +85,7 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 			break
 		}
 	}
-	b.UpdateHTML()
+	// b.UpdateHTML()
 }
 
 func (b *SiteBuilder) GetAllHTMLElementsAsJSON() ([]byte, error) {
@@ -105,5 +99,5 @@ func (b *SiteBuilder) OnBGColorChanged(jsonReq string) {
 	var request CSSColor
 	json.Unmarshal([]byte(jsonReq), &request)
 	b.bgColor = request.Color
-	b.UpdateCSS()
+	// b.UpdateCSS()
 }

@@ -52,7 +52,7 @@ func main() {
 	var socketHander SocketHander
 	var server HTTPServer
 	siteBuilder.Init()
-	socketHander.Init(siteBuilder)
+	socketHander.Init(&siteBuilder)
 
 	port := os.Getenv("PORT")
 	if port == "" {

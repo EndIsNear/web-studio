@@ -10,12 +10,12 @@ import (
 )
 
 type SocketHander struct {
-	siteBuilder SiteBuilder
+	siteBuilder *SiteBuilder
 	upgrader    websocket.Upgrader
 	conn        *websocket.Conn
 }
 
-func (s *SocketHander) Init(siteBuilder SiteBuilder) {
+func (s *SocketHander) Init(siteBuilder *SiteBuilder) {
 	s.siteBuilder = siteBuilder
 	s.upgrader = websocket.Upgrader{}
 	s.conn = nil

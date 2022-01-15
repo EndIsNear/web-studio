@@ -3,7 +3,7 @@ var socket;
 window.onload = function () {
     // setup the web socket
     if (window["WebSocket"]) {
-        socket = new WebSocket("ws://" + document.location.host + "/ws");
+        socket = new WebSocket("wss://" + document.location.host + "/ws");
         socket.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";
@@ -51,7 +51,6 @@ function handleOnMessage (evt) {
         div.appendChild(delButton);
         delButton.textContent="X";
         delButton.onclick=deleteHTMLElement.bind(this, val.id);
-        console.log(val);
     });
 }
 
