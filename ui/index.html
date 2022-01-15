@@ -2,15 +2,23 @@
 <html lang="en">
     <head>
         <title>Idle Studio</title>
-
-        <script src="scripts/script.js"></script> 
+        <script src="scripts/script.js"></script>
         <link rel="stylesheet" href="styles/main.css">
     </head>
     <body>
         <div class="controls">
-            <h3>Header</h3>
-            <button>Button</button>
+            <div id="uilinks">
+                <a href="/coding.html"><button>Code editor</button></a>
+                <a href="http://localhost:9000/" target="_blank" rel="noopener noreferrer"><button>View</button></a>
+            </div>
+            <button onclick="addButton()">Add button</button>
+            <br>
+            <button onclick="addHeader()">Add header</button>
+            <input type="color" id="bodyColor">
+            <div id="listelements">
+                Elements:
+            </div>
         </div>
-        <iframe class="viewport" src="http://localhost:9000/"></iframe> 
+        <iframe id="viewport" src="/result/index.html"></iframe> 
     </body>
 </html>

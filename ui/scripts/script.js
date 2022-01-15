@@ -1,36 +1,114 @@
-// window.onload = function () {
-//     var conn;
-//     var log = document.getElementById("log");
-//     log.innerHTML="WORKS!!"
+var socket;
 
-//     function appendLog(item) {
-//         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-//         log.appendChild(item);
-//         if (doScroll) {
-//             log.scrollTop = log.scrollHeight - log.clientHeight;
-//         }
-//     }
+window.onload = function () {
+    // setup the web socket
+    if (window["WebSocket"]) {
+        socket = new WebSocket("ws://" + document.location.host + "/ws");
+        socket.onclose = function (evt) {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Connection closed.</b>";
+        };
+        socket.onmessage = function (evt) {
+            handleOnMessage(evt);
 
-//     if (window["WebSocket"]) {
-//         conn = new WebSocket("ws://" + document.location.host + "/ws");
-//         conn.onclose = function (evt) {
-//             var item = document.createElement("div");
-//             item.innerHTML = "<b>Connection closed.</b>";
-//             appendLog(item);
-//         };
-//         conn.onmessage = function (evt) {
-//             var messages = evt.data.split('\n');
-//             for (var i = 0; i < messages.length; i++) {
-//                 var item = document.createElement("div");
-//                 item.innerText = messages[i];
-//                 appendLog(item);
-//             }
-//         };
-//     } else {
-//         var item = document.createElement("div");
-//         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-//         appendLog(item);
-//     }
-// };
 
-alert("alert!")
+        };
+    } else {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+        appendLog(item);
+    }
+
+    bodyColor = document.querySelector("#bodyColor");
+    bodyColor.addEventListener("change", bodyColorChange, false);
+};
+
+function handleOnMessage (evt) {
+    data=JSON.parse(evt.data);
+
+    parent = document.querySelector("#listelements");
+    while (parent.firstChild) {
+         parent.removeChild(parent.firstChild);
+    }
+
+    data.forEach(function (val) {
+        const div=document.createElement('div');
+        parent.appendChild(div);
+        divText=""
+        switch (val.type) {
+            case 'Button':
+                divText+="[B]";
+                break;
+            case 'Header':
+                divText+="[H]";
+                break;
+            default:
+                divText+="[_]";
+                break;  
+        }
+        div.textContent=divText+val.label
+        const delButton=document.createElement('button');
+        div.appendChild(delButton);
+        delButton.textContent="X";
+        delButton.onclick=deleteHTMLElement.bind(this, val.id);
+        console.log(val);
+    });
+}
+
+function send(message) {
+    if (!socket) {
+        console.error("web socket is not open");
+    }
+    socket.send(message);
+
+    // hack to refresh the page without anycallbacks
+    setTimeout(
+        function () {
+            document.getElementById('viewport').src += '';
+        }, 100
+    );
+}
+
+function deleteHTMLElement(id) {
+    const msg = {
+        messageType: "deleteHTMLElement",
+        id: id
+    };
+    send(JSON.stringify(msg));
+}
+
+function addButton() {
+    const name = prompt("Label", "Click me!");
+
+    if (name != null) {
+        const msg = {
+            messageType: "newHTMLElement",
+            type: "Button",
+            label: name
+        };
+        send(JSON.stringify(msg));
+    }
+}
+
+function addHeader() {
+    const text = prompt("Text", "Header content");
+
+    if (text != null) {
+        const msg = {
+            messageType: "newHTMLElement",
+            type: "Header",
+            label: text
+        };
+        send(JSON.stringify(msg));
+    }
+}
+
+function bodyColorChange(event) {
+    var msg = {
+        messageType: "changeBackgroundColor",
+        color: event.target.value
+    };
+
+    send(JSON.stringify(msg));
+}
+

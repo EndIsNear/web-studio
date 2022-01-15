@@ -3,10 +3,16 @@ body {
 }
 .controls {
     background-color: gray;
+    border-right: 4px double black;
     height: 90vh;
 }
 
-.viewport {
+#uilinks {
+    background-color: darkslategray;
+    padding: 5px;
+}
+
+#viewport {
     width: 100%;
     height: 90vh;
     border: 0px;
