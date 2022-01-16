@@ -11,6 +11,7 @@ import (
 type HTMLElementJSON struct {
 	ElementType string `json:"type"`
 	Label       string `json:"label"`
+	Blueprint   string `json:"blueprint"`
 	Id          string `json:"id"`
 }
 
@@ -47,7 +48,6 @@ func (b *SiteBuilder) ServeCSS(res http.ResponseWriter, req *http.Request) {
 }
 
 func (b *SiteBuilder) ServeJS(res http.ResponseWriter, req *http.Request) {
-	// var app=new Vue({el:"#app",data:{timer:0},created:function(){var e=this;setInterval(function(){e.timer++},1e3)},methods:{}});
 	header := `var app=new Vue({el:"#app",data:{timer:0},created:function(){`
 	callback := `var e=this;setInterval(function(){e.timer++},1e3)`
 	mid := `},methods:{`
@@ -63,7 +63,7 @@ func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
 
 	switch request.ElementType {
 	case "Button":
-		b.htmlElements = append(b.htmlElements, &HTMLButton{label: request.Label, id: b.lastUsedID})
+		b.htmlElements = append(b.htmlElements, &HTMLButton{label: request.Label, blueprint: request.Blueprint, id: b.lastUsedID})
 		b.lastUsedID++
 	case "Header":
 		b.htmlElements = append(b.htmlElements, &HTMLHeader{label: request.Label, id: b.lastUsedID})

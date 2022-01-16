@@ -1,19 +1,36 @@
 body {
     display: flex;
 }
-.controls {
+
+#controlspanel {
     background-color: gray;
     border-right: 4px double black;
     height: 90vh;
     width: 15vw;
-}
-
-#uilinks {
-    background-color: darkslategray;
     padding: 5px;
 }
 
-#infotext {
+.ui {
+    width: 100%;
+    margin-bottom: 5px;
+    cursor: pointer;
+    display: inline-block;
+    background: #333;
+    color: white;
+    font-size: 18px;
+    border: 0;
+    padding: 0.2rem;
+}
+
+button:hover {
+    transform: scale(0.98);
+}
+
+button:active {
+    transform: scale(1);
+}
+
+#uitext {
     padding: 0px;
     margin: 0px;
 }
@@ -24,7 +41,7 @@ body {
     border: 0px;
 }
 
-#element {
+#uielement {
     overflow: hidden;
     font-size: small;
 }

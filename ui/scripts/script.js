@@ -18,9 +18,6 @@ window.onload = function () {
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
         appendLog(item);
     }
-
-    bodyColor = document.querySelector("#bodyColor");
-    bodyColor.addEventListener("change", bodyColorChange, false);
 };
 
 function handleOnMessage (evt) {
@@ -46,8 +43,11 @@ function handleOnMessage (evt) {
                 divText+="[_]";
                 break;  
         }
+        if(val.blueprint != "") {
+            divText+=`(${val.blueprint})`
+        }
         div.textContent=divText+val.label
-        div.id="element"
+        div.id="uielement"
         const delButton=document.createElement('button');
         div.appendChild(delButton);
         delButton.textContent="X";
@@ -79,14 +79,17 @@ function deleteHTMLElement(id) {
 
 function addButton() {
     const name = prompt("Label", "Click me!");
-
     if (name != null) {
-        const msg = {
-            messageType: "newHTMLElement",
-            type: "Button",
-            label: name
-        };
-        send(JSON.stringify(msg));
+        const blueprint = prompt("Blueprint name (used in the code editor)", "blueprint");
+        if (blueprint != null) {
+            const msg = {
+                messageType: "newHTMLElement",
+                type: "Button",
+                label: name,
+                blueprint: blueprint
+            };
+            send(JSON.stringify(msg));
+        }
     }
 }
 
@@ -102,13 +105,3 @@ function addHeader() {
         send(JSON.stringify(msg));
     }
 }
-
-function bodyColorChange(event) {
-    var msg = {
-        messageType: "changeBackgroundColor",
-        color: event.target.value
-    };
-
-    send(JSON.stringify(msg));
-}
-
