@@ -17,18 +17,15 @@ type HTMLElementJSON struct {
 type SiteBuilder struct {
 	lastUsedID   uint
 	htmlElements []HTMLElement
-	//TODO: temp for fun
-	bgColor string
 }
 
 func (b *SiteBuilder) Init() {
-	b.bgColor = ""
 }
 
 func (b *SiteBuilder) ServeHTML(res http.ResponseWriter, req *http.Request) {
-	header := `<!DOCTYPE html><html lang="en"><head><script src="script.js"></script><link rel="stylesheet" href="style.css"><title>Idle game 2k22</title></head><body>`
+	header := `<!DOCTYPE html><html lang="en"><head><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script><title>Awesome website 2k22</title></head><body><div id="app">`
 	body := `<h1>You can add items here! Can you?!</h1>`
-	footer := `</body></html>`
+	footer := `</div><script src="script.js"></script></body></html>`
 
 	if len(b.htmlElements) > 0 {
 		body = ""
@@ -42,9 +39,9 @@ func (b *SiteBuilder) ServeHTML(res http.ResponseWriter, req *http.Request) {
 
 func (b *SiteBuilder) ServeCSS(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "text/css")
-	header := `body{ background-color: `
-	body := b.bgColor
-	footer := `; }`
+	header := `*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}#app{width:100vh;height:100vh;margin:auto;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}h1{margin:1rem;font-weight:400}button{margin:.1rem;cursor:pointer;display:inline-block;background:#333;color:#fff;font-size:18px;border:0;padding:1rem 1.5rem}button:hover{transform:scale(.98)}button:active{transform:scale(1)}`
+	body := ``
+	footer := ``
 
 	fmt.Fprintf(res, "%s%s%s", header, body, footer)
 }
@@ -67,7 +64,6 @@ func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
 	default:
 		log.Printf("The given %s HTMLElementJSON type can't be found", request.ElementType)
 	}
-	// b.UpdateHTML()
 }
 
 func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
@@ -85,7 +81,6 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 			break
 		}
 	}
-	// b.UpdateHTML()
 }
 
 func (b *SiteBuilder) GetAllHTMLElementsAsJSON() ([]byte, error) {
@@ -98,6 +93,4 @@ func (b *SiteBuilder) OnBGColorChanged(jsonReq string) {
 	}
 	var request CSSColor
 	json.Unmarshal([]byte(jsonReq), &request)
-	b.bgColor = request.Color
-	// b.UpdateCSS()
 }

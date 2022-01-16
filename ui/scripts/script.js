@@ -47,6 +47,7 @@ function handleOnMessage (evt) {
                 break;  
         }
         div.textContent=divText+val.label
+        div.id="element"
         const delButton=document.createElement('button');
         div.appendChild(delButton);
         delButton.textContent="X";
