@@ -13,6 +13,11 @@ body {
     padding: 5px;
 }
 
+#infotext {
+    padding: 0px;
+    margin: 0px;
+}
+
 #viewport {
     width: 100%;
     height: 90vh;

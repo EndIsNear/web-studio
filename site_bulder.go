@@ -47,7 +47,14 @@ func (b *SiteBuilder) ServeCSS(res http.ResponseWriter, req *http.Request) {
 }
 
 func (b *SiteBuilder) ServeJS(res http.ResponseWriter, req *http.Request) {
-	// fmt.Fprintf(res, "You can add items here! Can you?!\n")
+	// var app=new Vue({el:"#app",data:{timer:0},created:function(){var e=this;setInterval(function(){e.timer++},1e3)},methods:{}});
+	header := `var app=new Vue({el:"#app",data:{timer:0},created:function(){`
+	callback := `var e=this;setInterval(function(){e.timer++},1e3)`
+	mid := `},methods:{`
+	methods := ``
+	footer := `}});`
+
+	fmt.Fprintf(res, "%s%s%s%s%s", header, callback, mid, methods, footer)
 }
 
 func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
