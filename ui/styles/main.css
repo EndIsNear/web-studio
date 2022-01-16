@@ -1,9 +1,9 @@
-body {
+.appcontainer {
     display: flex;
 }
 
 #controlspanel {
-    background-color: gray;
+    background-color: #AAA;
     border-right: 4px double black;
     height: 90vh;
     width: 15vw;
@@ -15,7 +15,7 @@ body {
     margin-bottom: 5px;
     cursor: pointer;
     display: inline-block;
-    background: #333;
+    background: #555;
     color: white;
     font-size: 18px;
     border: 0;

@@ -23,7 +23,7 @@ func (h *HTMLButton) GetID() uint {
 }
 
 func (h *HTMLButton) ToString() string {
-	return fmt.Sprintf(`<button onClick="%s()">%s</button>`, h.blueprint, h.label)
+	return fmt.Sprintf(`<button v-on:click="%s()">%s</button>`, h.blueprint, h.label)
 }
 
 func (h *HTMLButton) MarshalJSON() ([]byte, error) {
