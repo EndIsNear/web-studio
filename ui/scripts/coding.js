@@ -1,5 +1,6 @@
 var socket;
 var editor;
+var onClickNode;
 
 window.onload = function () {
     socket=openSocket(handleOnMessage);
@@ -15,25 +16,30 @@ function InitNodeEditor() {
     editor.use(opts);
     
 
-    iface.addType("flow", "#ffff00");
+    iface.addType("flow", "#ffffff");
     iface.addType("int", "#ff0000");
+
+    // Flow nodes
+    onClickNode = new BaklavaJS.Core.NodeBuilder("On click").addOption("Button ID", "InputOption").addOutputInterface("Output", {type: "flow"}).build();
 
     // Integer nodes
     const readInt = new BaklavaJS.Core.NodeBuilder("Read number variable").addOption("Variable Name", "InputOption").addOutputInterface("Output", {type: "int"}).build();
-    const writeInt = new BaklavaJS.Core.NodeBuilder("Write number variable").addOption("Variable Name", "InputOption").addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
+    const writeInt = new BaklavaJS.Core.NodeBuilder("Write number variable").addOption("Variable Name", "InputOption").addInputInterface("Input Flow", "", "", {type: "flow"}).addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
 
-    const addInt = new BaklavaJS.Core.NodeBuilder("+Add number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    const subInt = new BaklavaJS.Core.NodeBuilder("-Subtract number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    const multInt = new BaklavaJS.Core.NodeBuilder("*Multiply number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    const divInt = new BaklavaJS.Core.NodeBuilder("/Devide number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    const addInt = new BaklavaJS.Core.NodeBuilder("Add number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    const subInt = new BaklavaJS.Core.NodeBuilder("Subtract number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    // const multInt = new BaklavaJS.Core.NodeBuilder("*Multiply number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    // const divInt = new BaklavaJS.Core.NodeBuilder("/Devide number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    //.addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("Output Flow", {type: "flow"})
+    editor.registerNodeType("On click", onClickNode, "Flows");
 
     editor.registerNodeType("Read", readInt, "Number");
     editor.registerNodeType("Write", writeInt, "Number");
 
     editor.registerNodeType("Add", addInt, "Number");
     editor.registerNodeType("Subtract", subInt, "Number");
-    editor.registerNodeType("Multiply", multInt, "Number");
-    editor.registerNodeType("Divide", divInt, "Number");
+    // editor.registerNodeType("Multiply", multInt, "Number");
+    // editor.registerNodeType("Divide", divInt, "Number");
 
     // const test = new BaklavaJS.Core.NodeBuilder("Flow start").addOutputInterface("Output", {type: "flow"}).build();
     // const test2 = new BaklavaJS.Core.NodeBuilder("Flow end").addInputInterface("Input", "", "", {type: "flow"}).build();
@@ -51,6 +57,9 @@ function handleOnMessage(evt) {
 }
 
 function onSave() {
+    var test=onClickNode;
+
+
     const message = {
         messageType: "updateBluprint",
         blueprintName: "Hardcoded name",

@@ -1,1 +1,1 @@
-web: bin/web-studio
+web: bin\web-studio.exe

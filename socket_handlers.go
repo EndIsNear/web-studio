@@ -63,7 +63,7 @@ func (s *SocketHander) HandleReadTextMessage(message []byte) {
 		s.siteBuilder.DeleteHTMLElement(string(message))
 		s.SendHTMLElements()
 	case "updateBluprint":
-		log.Print(string(message))
+		s.siteBuilder.BlueprintUpdate(string(message))
 	default:
 		log.Printf("The given %s messageType can't be found", val)
 	}

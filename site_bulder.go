@@ -15,6 +15,11 @@ type HTMLElementJSON struct {
 	Id          string `json:"id"`
 }
 
+type BluprintUpdateMessage struct {
+	Name  string    `json:"blueprintName"`
+	Graph CodeGraph `json:"graph"`
+}
+
 type SiteBuilder struct {
 	lastUsedID   uint
 	htmlElements []HTMLElement
@@ -59,7 +64,10 @@ func (b *SiteBuilder) ServeJS(res http.ResponseWriter, req *http.Request) {
 
 func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
 	var request HTMLElementJSON
-	json.Unmarshal([]byte(jsonReq), &request)
+	err := json.Unmarshal([]byte(jsonReq), &request)
+	if err != nil {
+		fmt.Errorf("Erron NewHTMLElement json unmarshal: %v", err)
+	}
 
 	switch request.ElementType {
 	case "Button":
@@ -75,7 +83,10 @@ func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
 
 func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 	var request HTMLElementJSON
-	json.Unmarshal([]byte(jsonReq), &request)
+	err := json.Unmarshal([]byte(jsonReq), &request)
+	if err != nil {
+		fmt.Errorf("Erron DeleteHTMLElement json unmarshal: %v", err)
+	}
 
 	id, err := strconv.ParseUint(request.Id, 10, 64)
 	if err != nil {
@@ -87,6 +98,14 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 			b.htmlElements = append(b.htmlElements[:idx], b.htmlElements[idx+1:]...)
 			break
 		}
+	}
+}
+
+func (b *SiteBuilder) BlueprintUpdate(jsonReq string) {
+	var request BluprintUpdateMessage
+	err := json.Unmarshal([]byte(jsonReq), &request)
+	if err != nil {
+		fmt.Errorf("Erron BlueprintUpdate json unmarshal: %v", err)
 	}
 }
 

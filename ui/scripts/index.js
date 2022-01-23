@@ -67,7 +67,7 @@ function deleteHTMLElement(id) {
 function addButton() {
     const name = prompt("Label", "Click me!");
     if (name != null) {
-        const blueprint = prompt("Blueprint name (used in the code editor)", "blueprint");
+        const blueprint = prompt("Button ID(used in the code editor)", "ID");
         if (blueprint != null) {
             const msg = {
                 messageType: "newHTMLElement",
