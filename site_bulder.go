@@ -93,11 +93,3 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 func (b *SiteBuilder) GetAllHTMLElementsAsJSON() ([]byte, error) {
 	return json.Marshal(b.htmlElements)
 }
-
-func (b *SiteBuilder) OnBGColorChanged(jsonReq string) {
-	type CSSColor struct {
-		Color string `json:"color"`
-	}
-	var request CSSColor
-	json.Unmarshal([]byte(jsonReq), &request)
-}

@@ -62,8 +62,8 @@ func (s *SocketHander) HandleReadTextMessage(message []byte) {
 	case "deleteHTMLElement":
 		s.siteBuilder.DeleteHTMLElement(string(message))
 		s.SendHTMLElements()
-	case "changeBackgroundColor":
-		s.siteBuilder.OnBGColorChanged(string(message))
+	case "updateBluprint":
+		log.Print(string(message))
 	default:
 		log.Printf("The given %s messageType can't be found", val)
 	}

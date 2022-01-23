@@ -1,27 +1,14 @@
 var socket;
 
 window.onload = function () {
-    // setup the web socket
-    if (window["WebSocket"]) {
-        socket = new WebSocket("wss://" + document.location.host + "/ws");
-        socket.onclose = function (evt) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Connection closed.</b>";
-        };
-        socket.onmessage = function (evt) {
-            handleOnMessage(evt);
-
-
-        };
-    } else {
-        var item = document.createElement("div");
-        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendLog(item);
-    }
+    socket=openSocket(handleOnMessage);
 };
 
 function handleOnMessage (evt) {
     data=JSON.parse(evt.data);
+    if (data==null) {
+        return;
+    }
 
     parent = document.querySelector("#listelements");
     while (parent.firstChild) {
