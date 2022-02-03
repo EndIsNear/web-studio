@@ -23,9 +23,12 @@ type BluprintUpdateMessage struct {
 type SiteBuilder struct {
 	lastUsedID   uint
 	htmlElements []HTMLElement
+
+	Graph CodeGraph
 }
 
 func (b *SiteBuilder) Init() {
+	b.Graph.Init()
 }
 
 func (b *SiteBuilder) ServeHTML(res http.ResponseWriter, req *http.Request) {
@@ -53,20 +56,15 @@ func (b *SiteBuilder) ServeCSS(res http.ResponseWriter, req *http.Request) {
 }
 
 func (b *SiteBuilder) ServeJS(res http.ResponseWriter, req *http.Request) {
-	header := `var app=new Vue({el:"#app",data:{timer:0},created:function(){`
-	callback := `var e=this;setInterval(function(){e.timer++},1e3)`
-	mid := `},methods:{`
-	methods := ``
-	footer := `}});`
-
-	fmt.Fprintf(res, "%s%s%s%s%s", header, callback, mid, methods, footer)
+	code := b.Graph.Build()
+	fmt.Fprintf(res, "%s", code)
 }
 
 func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
 	var request HTMLElementJSON
 	err := json.Unmarshal([]byte(jsonReq), &request)
 	if err != nil {
-		fmt.Errorf("Erron NewHTMLElement json unmarshal: %v", err)
+		log.Printf("Erron NewHTMLElement json unmarshal: %v", err)
 	}
 
 	switch request.ElementType {
@@ -85,12 +83,12 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 	var request HTMLElementJSON
 	err := json.Unmarshal([]byte(jsonReq), &request)
 	if err != nil {
-		fmt.Errorf("Erron DeleteHTMLElement json unmarshal: %v", err)
+		log.Printf("Erron DeleteHTMLElement json unmarshal: %v", err)
 	}
 
 	id, err := strconv.ParseUint(request.Id, 10, 64)
 	if err != nil {
-		fmt.Errorf("Cant parse deleting item's id: %v", err)
+		log.Printf("Cant parse deleting item's id: %v", err)
 		return
 	}
 	for idx, elem := range b.htmlElements {
@@ -103,10 +101,13 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 
 func (b *SiteBuilder) BlueprintUpdate(jsonReq string) {
 	var request BluprintUpdateMessage
+	request.Graph.Init()
 	err := json.Unmarshal([]byte(jsonReq), &request)
 	if err != nil {
-		fmt.Errorf("Erron BlueprintUpdate json unmarshal: %v", err)
+		log.Printf("Erron BlueprintUpdate json unmarshal: %v", err)
 	}
+
+	b.Graph = request.Graph
 }
 
 func (b *SiteBuilder) GetAllHTMLElementsAsJSON() ([]byte, error) {

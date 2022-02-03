@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -13,12 +12,15 @@ type SocketHander struct {
 	siteBuilder *SiteBuilder
 	upgrader    websocket.Upgrader
 	conn        *websocket.Conn
+
+	savedGraph string
 }
 
 func (s *SocketHander) Init(siteBuilder *SiteBuilder) {
 	s.siteBuilder = siteBuilder
 	s.upgrader = websocket.Upgrader{}
 	s.conn = nil
+	s.savedGraph = ""
 }
 
 func (s *SocketHander) Listen(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +65,10 @@ func (s *SocketHander) HandleReadTextMessage(message []byte) {
 		s.siteBuilder.DeleteHTMLElement(string(message))
 		s.SendHTMLElements()
 	case "updateBluprint":
+		s.savedGraph = string(message)
 		s.siteBuilder.BlueprintUpdate(string(message))
+	case "requestGraphSave":
+		s.SendSavedCodeGraphJSON()
 	default:
 		log.Printf("The given %s messageType can't be found", val)
 	}
@@ -73,11 +78,18 @@ func (s *SocketHander) SendHTMLElements() {
 	// check if connection is open
 	message, err := s.siteBuilder.GetAllHTMLElementsAsJSON()
 	if err != nil {
-		fmt.Errorf("While marshling all html elements: %v", err)
+		log.Printf("While marshling all html elements: %v", err)
 	}
 
 	err = s.conn.WriteMessage(websocket.TextMessage, message)
 	if err != nil {
 		log.Println("Error during message writing:", err)
+	}
+}
+
+func (s *SocketHander) SendSavedCodeGraphJSON() {
+	err := s.conn.WriteMessage(websocket.TextMessage, []byte(s.savedGraph))
+	if err != nil {
+		log.Println("Error during sending saved graph:", err)
 	}
 }
