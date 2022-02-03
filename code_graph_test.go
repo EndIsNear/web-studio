@@ -19,3 +19,18 @@ func TestBuildSimpleGraph(t *testing.T) {
 		t.Errorf("Wrong code: %s", jsCode)
 	}
 }
+
+func TestBuildSimpleGraph2(t *testing.T) {
+	bytes := `{"nodes":[{"type":"On click","id":"node_16439173677720","name":"On click","options":[["Button ID",null]],"state":{},"interfaces":[["Output",{"id":"ni_16439173677721","value":null}]],"position":{"x":200,"y":207},"width":200,"twoColumn":false,"customClasses":""},{"type":"Write num","id":"node_16439173705002","name":"Write num","options":[["Variable Name",null]],"state":{},"interfaces":[["Input Flow",{"id":"ni_16439173705003","value":""}],["Input",{"id":"ni_16439173705004","value":""}]],"position":{"x":967,"y":347},"width":200,"twoColumn":false,"customClasses":""},{"type":"Add num","id":"node_16439173754139","name":"Add num","options":[],"state":{},"interfaces":[["A",{"id":"ni_164391737541310","value":5}],["B",{"id":"ni_164391737541311","value":5}],["Result",{"id":"ni_164391737541312","value":null}]],"position":{"x":482,"y":533},"width":200,"twoColumn":false,"customClasses":""}],"connections":[{"id":"16439173737798","from":"ni_16439173677721","to":"ni_16439173705003"},{"id":"164391737778215","from":"ni_164391737541312","to":"ni_16439173705004"}],"panning":{"x":0,"y":0},"scaling":1}`
+	var graph CodeGraph
+	graph.Init()
+	err := json.Unmarshal([]byte(bytes), &graph)
+	if err != nil {
+		t.Error("Cant unmarshal by array")
+	}
+
+	jsCode := graph.Build()
+	if jsCode != `var app=new Vue({el:"#app",data:{timer:0},created:function(){var e=this;setInterval(function(){e.timer++},1e3)},methods:{}});` {
+		t.Errorf("Wrong code: %s", jsCode)
+	}
+}

@@ -24,35 +24,36 @@ function InitNodeEditor() {
 
     iface.addType("flow", "#ffffff");
     iface.addType("int", "#ff0000");
+    iface.addType("bool", "#ff0000");
 
     // Flow nodes
-    onClickNode = new BaklavaJS.Core.NodeBuilder("On click").addOption("Button ID", "InputOption").addOutputInterface("Output", {type: "flow"}).build();
+    const onClickNode = new BaklavaJS.Core.NodeBuilder("On click").addOption("Button ID", "InputOption").addOutputInterface("Output", {type: "flow"}).build();
+    editor.registerNodeType("On click", onClickNode, "Flows");
 
     // Integer nodes
     const readInt = new BaklavaJS.Core.NodeBuilder("Read num").addOption("Variable Name", "InputOption").addOutputInterface("Output", {type: "int"}).build();
-    const writeInt = new BaklavaJS.Core.NodeBuilder("Write num").addOption("Variable Name", "InputOption").addInputInterface("Input Flow", "", "", {type: "flow"}).addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
-
-    const addInt = new BaklavaJS.Core.NodeBuilder("Add num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    const subInt = new BaklavaJS.Core.NodeBuilder("Subtract num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    // const multInt = new BaklavaJS.Core.NodeBuilder("*Multiply number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    // const divInt = new BaklavaJS.Core.NodeBuilder("/Devide number").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    //.addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("Output Flow", {type: "flow"})
-    editor.registerNodeType("On click", onClickNode, "Flows");
-
     editor.registerNodeType("Read num", readInt, "Number");
+    const writeInt = new BaklavaJS.Core.NodeBuilder("Write num").addOption("Variable Name", "InputOption").addInputInterface("Input Flow", "", "", {type: "flow"}).addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
     editor.registerNodeType("Write num", writeInt, "Number");
 
+    const addInt = new BaklavaJS.Core.NodeBuilder("Add num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
     editor.registerNodeType("Add num", addInt, "Number");
+    const subInt = new BaklavaJS.Core.NodeBuilder("Subtract num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
     editor.registerNodeType("Subtract num", subInt, "Number");
-    // editor.registerNodeType("Multiply", multInt, "Number");
-    // editor.registerNodeType("Divide", divInt, "Number");
-
+    const multInt = new BaklavaJS.Core.NodeBuilder("Multiply num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    editor.registerNodeType("Multiply num", multInt, "Number");
+    const divInt = new BaklavaJS.Core.NodeBuilder("Devide num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    editor.registerNodeType("Devide num", divInt, "Number");
+    
+    
+    
     // const test = new BaklavaJS.Core.NodeBuilder("Flow start").addOutputInterface("Output", {type: "flow"}).build();
     // const test2 = new BaklavaJS.Core.NodeBuilder("Flow end").addInputInterface("Input", "", "", {type: "flow"}).build();
-
+    
     // const myNode = new BaklavaJS.Core.NodeBuilder("Test").addInputInterface("My Interface", "meh", "", {type: "string"}).build();
     // const myNode2 = new BaklavaJS.Core.NodeBuilder("Test2").addOutputInterface("My Interface", {type: "int"}).build();
     // const myNode3 = new BaklavaJS.Core.NodeBuilder("Test3").addInputInterface("My Interface", "meh", "", {type: "int"}).addOption("Variable Name", "InputOption").addOption("Variable Name2", "InputOption").addOption("Varia", "NumberOption").build();
+    //.addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("Output Flow", {type: "flow"})
 }
 
 function handleOnMessage(evt) {
@@ -64,9 +65,6 @@ function handleOnMessage(evt) {
 }
 
 function onSave() {
-    var test=onClickNode;
-
-
     const message = {
         messageType: "updateBluprint",
         blueprintName: "Hardcoded name",
@@ -78,4 +76,9 @@ function onSave() {
         console.error("web socket is not open");
     }
     socket.send(JSON.stringify(message));
+}
+
+function onBack() {
+    onSave();
+    document.location.href = "/";
 }

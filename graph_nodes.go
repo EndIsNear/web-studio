@@ -97,9 +97,26 @@ func (n *NodeNumberOperation) GetCode(funcName string) string {
 
 		opCode = fmt.Sprintf(`%s()%s%f`, calleeFuncName, n.Operand, n.ValueB)
 	} else if n.ConnA == -1 {
-		opCode = fmt.Sprintf(`%f%s%f`, n.ValueA, n.Operand, n.ValueB)
+		calleeFuncName := n.CodeGraph.GetNextFuncName()
+
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnB)
+		if childNode != nil {
+			calleesCode = childNode.GetCode(calleeFuncName)
+		}
+
+		opCode = fmt.Sprintf(`%s()%s%f`, calleeFuncName, n.Operand, n.ValueA)
 	} else {
-		opCode = fmt.Sprintf(`%f%s%f`, n.ValueA, n.Operand, n.ValueB)
+		calleeFuncName := n.CodeGraph.GetNextFuncName()
+		calleeFuncName2 := n.CodeGraph.GetNextFuncName()
+
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnA)
+		childNode2 := n.CodeGraph.GetConnectedNode(n.ConnB)
+		if childNode != nil && childNode2 != nil {
+			calleesCode = childNode.GetCode(calleeFuncName)
+			calleesCode += childNode2.GetCode(calleeFuncName)
+		}
+
+		opCode = fmt.Sprintf(`%s()%s%s()`, calleeFuncName, n.Operand, calleeFuncName2)
 	}
 	return fmt.Sprintf(`%s %s=()=>{ return %s};`, calleesCode, funcName, opCode)
 }

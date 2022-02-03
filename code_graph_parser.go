@@ -14,6 +14,7 @@ type InterfacePropsJSON struct {
 }
 
 func (c *CodeGraph) UnmarshalJSON(bytes []byte) error {
+	// println(string(bytes))
 	var data map[string]*json.RawMessage
 	err := json.Unmarshal(bytes, &data)
 	if err != nil {
@@ -83,14 +84,18 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 		switch nodeType.Name {
 		case "On click":
 			c.parseOnClick(element, idsMap)
-		case "Read number variable":
+		case "Read num":
 			c.parseReadNumVar(element, idsMap)
-		case "Write number variable":
+		case "Write num":
 			c.parseWriteNumVar(element, idsMap)
-		case "Add number":
+		case "Add num":
 			c.parseNumOperation(element, "+", idsMap)
-		case "Subtract number":
+		case "Subtract num":
 			c.parseNumOperation(element, "-", idsMap)
+		case "Multiply num":
+			c.parseNumOperation(element, "*", idsMap)
+		case "Devide num":
+			c.parseNumOperation(element, "/", idsMap)
 		default:
 			return errors.New("unknown node type while CodeGraph unmarshal")
 		}
