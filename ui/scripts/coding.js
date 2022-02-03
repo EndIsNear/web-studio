@@ -24,11 +24,15 @@ function InitNodeEditor() {
 
     iface.addType("flow", "#ffffff");
     iface.addType("int", "#ff0000");
-    iface.addType("bool", "#ff0000");
+    iface.addType("bool", "#00ff00");
 
     // Flow nodes
     const onClickNode = new BaklavaJS.Core.NodeBuilder("On click").addOption("Button ID", "InputOption").addOutputInterface("Output", {type: "flow"}).build();
     editor.registerNodeType("On click", onClickNode, "Flows");
+
+    // Logic nodes
+    const ifNode = new BaklavaJS.Core.NodeBuilder("If/Else").addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("True", {type: "flow"}).addOutputInterface("False", {type: "flow"}).addInputInterface("Condition", "", "", {type: "bool"}).build();
+    editor.registerNodeType("If/Else", ifNode, "Logic");
 
     // Integer nodes
     const readInt = new BaklavaJS.Core.NodeBuilder("Read num").addOption("Variable Name", "InputOption").addOutputInterface("Output", {type: "int"}).build();
@@ -44,9 +48,16 @@ function InitNodeEditor() {
     editor.registerNodeType("Multiply num", multInt, "Number");
     const divInt = new BaklavaJS.Core.NodeBuilder("Devide num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
     editor.registerNodeType("Devide num", divInt, "Number");
+
+    const compInt = new BaklavaJS.Core.NodeBuilder("Compare num")
+    .addOption("Operator", "SelectOption", "EquEqual(==)", undefined, { items: ["Equal(==)", "Not Equal(!=)", "Greater Than(>)", "Less Than(<)", "Greater or Equal(>=)", "Less or Equal(<=)"]})
+    .addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "bool"}).build();
+    editor.registerNodeType("Compare num", compInt, "Number");
     
     
-    
+    // BOOL
+    //"AND(&&)", "OR(||)"
+
     // const test = new BaklavaJS.Core.NodeBuilder("Flow start").addOutputInterface("Output", {type: "flow"}).build();
     // const test2 = new BaklavaJS.Core.NodeBuilder("Flow end").addInputInterface("Input", "", "", {type: "flow"}).build();
     
