@@ -51,10 +51,13 @@ func (c *CodeGraph) GetNextFuncName() string {
 }
 
 func (c *CodeGraph) BuildMethods() string {
-	if len(c.StartingNodes) > 0 {
-		return c.StartingNodes[0].GetCode("")
+	var res string
+	for _, et := range c.StartingNodes {
+		res += et.GetCode("")
+		res += ", "
 	}
-	return ""
+
+	return res
 }
 
 func (c *CodeGraph) GetConnectedNode(id int) GraphNode {
