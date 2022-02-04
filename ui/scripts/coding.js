@@ -43,14 +43,19 @@ function InitNodeEditor() {
     const randInt = new BaklavaJS.Core.NodeBuilder("Random num").addInputInterface("From", "NumberOption", "0", {type: "int"}).addInputInterface("To", "NumberOption", "10", {type: "int"}).addOutputInterface("Output", {type: "int"}).build();
     editor.registerNodeType("Random num", randInt, "Number");
 
-    const addInt = new BaklavaJS.Core.NodeBuilder("Add num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    editor.registerNodeType("Add num", addInt, "Number");
-    const subInt = new BaklavaJS.Core.NodeBuilder("Subtract num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    editor.registerNodeType("Subtract num", subInt, "Number");
-    const multInt = new BaklavaJS.Core.NodeBuilder("Multiply num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    editor.registerNodeType("Multiply num", multInt, "Number");
-    const divInt = new BaklavaJS.Core.NodeBuilder("Devide num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
-    editor.registerNodeType("Devide num", divInt, "Number");
+    const opInt = new BaklavaJS.Core.NodeBuilder("Operators")
+    .addOption("Operator", "SelectOption", "Add(+)", undefined, { items: ["Add(+)", "Subtract(-)", "Multiply(*)", "Devide(/)", "Modulus(%)"]})
+    .addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"})
+    .addOutputInterface("Result", {type: "int"}).build();
+    editor.registerNodeType("Operators", opInt, "Number");
+    // const addInt = new BaklavaJS.Core.NodeBuilder("Add num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    // editor.registerNodeType("Add num", addInt, "Number");
+    // const subInt = new BaklavaJS.Core.NodeBuilder("Subtract num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    // editor.registerNodeType("Subtract num", subInt, "Number");
+    // const multInt = new BaklavaJS.Core.NodeBuilder("Multiply num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    // editor.registerNodeType("Multiply num", multInt, "Number");
+    // const divInt = new BaklavaJS.Core.NodeBuilder("Devide num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    // editor.registerNodeType("Devide num", divInt, "Number");
 
     const compInt = new BaklavaJS.Core.NodeBuilder("Compare num")
     .addOption("Operator", "SelectOption", "EquEqual(==)", undefined, { items: ["Equal(==)", "Not Equal(!=)", "Greater Than(>)", "Less Than(<)", "Greater or Equal(>=)", "Less or Equal(<=)"]})

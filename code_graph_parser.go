@@ -90,14 +90,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseWriteNumVar(element, idsMap)
 		case "Random num":
 			c.parseRandomNum(element, idsMap)
-		case "Add num":
-			c.parseNumOperation(element, "+", idsMap)
-		case "Subtract num":
-			c.parseNumOperation(element, "-", idsMap)
-		case "Multiply num":
-			c.parseNumOperation(element, "*", idsMap)
-		case "Devide num":
-			c.parseNumOperation(element, "/", idsMap)
+		case "Operators":
+			c.parseNumOperation(element, idsMap)
 		default:
 			return errors.New("unknown node type while CodeGraph unmarshal")
 		}
@@ -304,11 +298,32 @@ func (c *CodeGraph) parseRandomNum(bytes json.RawMessage, idsMap map[string]int)
 	return nil
 }
 
-func (c *CodeGraph) parseNumOperation(bytes json.RawMessage, op string, idsMap map[string]int) error {
-	_, ifaces, err := getOptsIfaces(bytes)
+func (c *CodeGraph) parseNumOperation(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
 	if err != nil {
 		fmt.Println(err)
 		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Operator")
+	if err != nil {
+		return err
+	}
+
+	var op string
+	switch val {
+	case "Add(+)":
+		op = "+"
+	case "Subtract(-)":
+		op = "-"
+	case "Multiply(*)":
+		op = "*"
+	case "Devide(/)":
+		op = "/"
+	case "Modulus(%)":
+		op = "%"
+	default:
+		return errors.New("unknown operation in Num opeator node")
 	}
 
 	aValS, aID, err := getIfaceAtIndex(ifaces, 0, "A", idsMap)
