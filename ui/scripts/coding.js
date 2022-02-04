@@ -40,6 +40,9 @@ function InitNodeEditor() {
     const writeInt = new BaklavaJS.Core.NodeBuilder("Write num").addOption("Variable Name", "InputOption").addInputInterface("Input Flow", "", "", {type: "flow"}).addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
     editor.registerNodeType("Write num", writeInt, "Number");
 
+    const randInt = new BaklavaJS.Core.NodeBuilder("Random num").addInputInterface("From", "NumberOption", "0", {type: "int"}).addInputInterface("To", "NumberOption", "10", {type: "int"}).addOutputInterface("Output", {type: "int"}).build();
+    editor.registerNodeType("Random num", randInt, "Number");
+
     const addInt = new BaklavaJS.Core.NodeBuilder("Add num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
     editor.registerNodeType("Add num", addInt, "Number");
     const subInt = new BaklavaJS.Core.NodeBuilder("Subtract num").addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();

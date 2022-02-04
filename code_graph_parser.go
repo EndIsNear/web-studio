@@ -88,6 +88,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseReadNumVar(element, idsMap)
 		case "Write num":
 			c.parseWriteNumVar(element, idsMap)
+		case "Random num":
+			c.parseRandomNum(element, idsMap)
 		case "Add num":
 			c.parseNumOperation(element, "+", idsMap)
 		case "Subtract num":
@@ -258,6 +260,47 @@ func (c *CodeGraph) parseWriteNumVar(bytes json.RawMessage, idsMap map[string]in
 
 	c.NumVariables[val] = true
 	c.Nodes = append(c.Nodes, &NodeWriteNumber{VarName: val, NumInputConn: id, FlowInput: flowId, CodeGraph: c})
+	return nil
+}
+
+func (c *CodeGraph) parseRandomNum(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	aValS, aID, err := getIfaceAtIndex(ifaces, 0, "From", idsMap)
+	if err != nil {
+		return err
+	}
+	aValF, err := strconv.ParseFloat(aValS, 32)
+	if err != nil {
+		aValF = 0.0
+	}
+
+	bValS, bID, err := getIfaceAtIndex(ifaces, 1, "To", idsMap)
+	if err != nil {
+		return err
+	}
+	bValF, err := strconv.ParseFloat(bValS, 32)
+	if err != nil {
+		aValF = 0.0
+	}
+
+	_, resID, err := getIfaceAtIndex(ifaces, 2, "Output", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.Nodes = append(c.Nodes, &NodeRandomNumber{
+		CodeGraph: c,
+		ValFrom:   float32(aValF),
+		ConnFrom:  aID,
+		ValTo:     float32(bValF),
+		ConnTo:    bID,
+		ResConn:   resID,
+	})
 	return nil
 }
 

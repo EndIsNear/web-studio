@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type GraphNode interface {
 	GetCode(funcName string) string
@@ -122,5 +124,52 @@ func (n *NodeNumberOperation) GetCode(funcName string) string {
 }
 
 func (n *NodeNumberOperation) HasInputWithID(id int) bool {
+	return id == n.ResConn
+}
+
+type NodeRandomNumber struct {
+	CodeGraph *CodeGraph
+
+	ValFrom  float32
+	ValTo    float32
+	ConnFrom int
+	ConnTo   int
+
+	ResConn int
+}
+
+func (n *NodeRandomNumber) GetCode(funcName string) string {
+	var calleesCode string
+	var valFrom string
+	var valTo string
+
+	if n.ConnFrom == -1 {
+		valFrom = fmt.Sprintf("%f", n.ValFrom)
+	} else {
+		calleeFuncName := n.CodeGraph.GetNextFuncName()
+
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnFrom)
+		if childNode != nil {
+			calleesCode += childNode.GetCode(calleeFuncName)
+		}
+		valFrom = calleeFuncName + "()"
+	}
+
+	if n.ConnTo == -1 {
+		valTo = fmt.Sprintf("%f", n.ValTo)
+	} else {
+		calleeFuncName := n.CodeGraph.GetNextFuncName()
+
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnTo)
+		if childNode != nil {
+			calleesCode += childNode.GetCode(calleeFuncName)
+		}
+		valTo = calleeFuncName + "()"
+	}
+
+	return fmt.Sprintf(`%s %s=()=>{ let a=%s; let b=%s; return (Math.random() * (b-a) + a)};`, calleesCode, funcName, valFrom, valTo)
+}
+
+func (n *NodeRandomNumber) HasInputWithID(id int) bool {
 	return id == n.ResConn
 }
