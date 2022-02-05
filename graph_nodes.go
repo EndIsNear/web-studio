@@ -173,3 +173,89 @@ func (n *NodeRandomNumber) GetCode(funcName string) string {
 func (n *NodeRandomNumber) HasInputWithID(id int) bool {
 	return id == n.ResConn
 }
+
+type NodeCompareNumbers struct {
+	CodeGraph *CodeGraph
+
+	Operator string
+	ValueA   float32
+	ValueB   float32
+	ConnA    int
+	ConnB    int
+
+	ResConn int
+}
+
+func (n *NodeCompareNumbers) GetCode(funcName string) string {
+	var calleesCode string
+	var codeA string
+	var codeB string
+
+	if n.ConnA == -1 {
+		codeA = fmt.Sprintf("%f", n.ValueA)
+	} else {
+		calleeFuncName := n.CodeGraph.GetNextFuncName()
+
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnA)
+		if childNode != nil {
+			calleesCode += childNode.GetCode(calleeFuncName)
+		}
+		codeA = calleeFuncName + "()"
+	}
+
+	if n.ConnB == -1 {
+		codeB = fmt.Sprintf("%f", n.ValueB)
+	} else {
+		calleeFuncName := n.CodeGraph.GetNextFuncName()
+
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnB)
+		if childNode != nil {
+			calleesCode += childNode.GetCode(calleeFuncName)
+		}
+		codeB = calleeFuncName + "()"
+	}
+
+	return fmt.Sprintf(`%s %s=()=>{ return %s %s %s };`, calleesCode, funcName, codeA, n.Operator, codeB)
+}
+
+func (n *NodeCompareNumbers) HasInputWithID(id int) bool {
+	return id == n.ResConn
+}
+
+type NodeIfElse struct {
+	CodeGraph *CodeGraph
+
+	InputFlowID int
+	TrueFlowID  int
+	FalseFlowID int
+
+	ConditionID int
+}
+
+func (n *NodeIfElse) GetCode(funcName string) string {
+	calleesCode := ""
+
+	condCode := n.CodeGraph.GetNextFuncName()
+	childNode := n.CodeGraph.GetConnectedNode(n.ConditionID)
+	if childNode != nil {
+		calleesCode += childNode.GetCode(condCode)
+	}
+
+	trueCode := n.CodeGraph.GetNextFuncName()
+	childNode = n.CodeGraph.GetConnectedNode(n.TrueFlowID)
+	if childNode != nil {
+		calleesCode += childNode.GetCode(trueCode)
+	}
+
+	falseCode := n.CodeGraph.GetNextFuncName()
+	childNode = n.CodeGraph.GetConnectedNode(n.FalseFlowID)
+	if childNode != nil {
+		calleesCode += childNode.GetCode(falseCode)
+	}
+
+	return fmt.Sprintf(`%s if (%s()) {%s()} else {%s()};`, calleesCode, condCode, trueCode, falseCode)
+}
+
+func (n *NodeIfElse) HasInputWithID(id int) bool {
+	return id == n.InputFlowID
+}

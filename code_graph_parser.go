@@ -14,7 +14,7 @@ type InterfacePropsJSON struct {
 }
 
 func (c *CodeGraph) UnmarshalJSON(bytes []byte) error {
-	// println(string(bytes))
+	println(string(bytes))
 	var data map[string]*json.RawMessage
 	err := json.Unmarshal(bytes, &data)
 	if err != nil {
@@ -92,6 +92,10 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseRandomNum(element, idsMap)
 		case "Operators":
 			c.parseNumOperation(element, idsMap)
+		case "If/Else":
+			c.parseIfElse(element, idsMap)
+		case "Compare num":
+			c.parseNumComparison(element, idsMap)
 		default:
 			return errors.New("unknown node type while CodeGraph unmarshal")
 		}
@@ -155,7 +159,7 @@ func getIfaceAtIndex(ifaces []json.RawMessage, index uint, expectedName string, 
 		return
 	}
 	if name != expectedName {
-		err = errors.New("first interface of onClick is not " + expectedName)
+		err = errors.New("expected interface name:" + expectedName + " the name is:" + name)
 		name = ""
 		return
 	}
@@ -357,6 +361,105 @@ func (c *CodeGraph) parseNumOperation(bytes json.RawMessage, idsMap map[string]i
 		ConnB:     bID,
 		ResConn:   resID,
 		Operand:   op,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseNumComparison(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Operator")
+	if err != nil {
+		return err
+	}
+
+	var op string
+	switch val {
+	case "Equal(==)":
+		op = "=="
+	case "Not Equal(!=)":
+		op = "!="
+	case "Greater Than(>)":
+		op = ">"
+	case "Less Than(<)":
+		op = "<"
+	case "Greater or Equal(>=)":
+		op = ">="
+	case "Less or Equal(<=)":
+		op = "<="
+	default:
+		return errors.New("unknown operation in Num comparison node")
+	}
+
+	aValS, aID, err := getIfaceAtIndex(ifaces, 0, "A", idsMap)
+	if err != nil {
+		return err
+	}
+	aValF, err := strconv.ParseFloat(aValS, 32)
+	if err != nil {
+		aValF = 0.0
+	}
+
+	bValS, bID, err := getIfaceAtIndex(ifaces, 1, "B", idsMap)
+	if err != nil {
+		return err
+	}
+	bValF, err := strconv.ParseFloat(bValS, 32)
+	if err != nil {
+		aValF = 0.0
+	}
+
+	_, resID, err := getIfaceAtIndex(ifaces, 2, "Result", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.Nodes = append(c.Nodes, &NodeCompareNumbers{
+		CodeGraph: c,
+		ValueA:    float32(aValF),
+		ConnA:     aID,
+		ValueB:    float32(bValF),
+		ConnB:     bID,
+		ResConn:   resID,
+		Operator:  op,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseIfElse(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, inputID, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+	_, trueID, err := getIfaceAtIndex(ifaces, 1, "True", idsMap)
+	if err != nil {
+		return err
+	}
+	_, falseID, err := getIfaceAtIndex(ifaces, 2, "False", idsMap)
+	if err != nil {
+		return err
+	}
+	_, condID, err := getIfaceAtIndex(ifaces, 3, "Condition", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.Nodes = append(c.Nodes, &NodeIfElse{
+		CodeGraph:   c,
+		InputFlowID: inputID,
+		TrueFlowID:  trueID,
+		FalseFlowID: falseID,
+		ConditionID: condID,
 	})
 	return nil
 }
