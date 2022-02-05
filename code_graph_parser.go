@@ -96,6 +96,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseIfElse(element, idsMap)
 		case "Compare num":
 			c.parseNumComparison(element, idsMap)
+		case "Split flow":
+			c.parseSplitFLow(element, idsMap)
 		default:
 			return errors.New("unknown node type while CodeGraph unmarshal")
 		}
@@ -460,6 +462,35 @@ func (c *CodeGraph) parseIfElse(bytes json.RawMessage, idsMap map[string]int) er
 		TrueFlowID:  trueID,
 		FalseFlowID: falseID,
 		ConditionID: condID,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseSplitFLow(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, inputID, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+	_, oneID, err := getIfaceAtIndex(ifaces, 1, "Output 1", idsMap)
+	if err != nil {
+		return err
+	}
+	_, twoID, err := getIfaceAtIndex(ifaces, 2, "Output 2", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.Nodes = append(c.Nodes, &NodeSplitFlow{
+		CodeGraph:   c,
+		InputFlowID: inputID,
+		Flow1ID:     oneID,
+		FLow2ID:     twoID,
 	})
 	return nil
 }

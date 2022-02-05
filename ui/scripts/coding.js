@@ -30,6 +30,9 @@ function InitNodeEditor() {
     const onClickNode = new BaklavaJS.Core.NodeBuilder("On click").addOption("Button ID", "InputOption").addOutputInterface("Output", {type: "flow"}).build();
     editor.registerNodeType("On click", onClickNode, "Flows");
 
+    const splitFlow = new BaklavaJS.Core.NodeBuilder("Split flow").addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("Output 1", {type: "flow"}).addOutputInterface("Output 2", {type: "flow"}).build();
+    editor.registerNodeType("Split flow", splitFlow, "Flows");
+
     // Logic nodes
     const ifNode = new BaklavaJS.Core.NodeBuilder("If/Else").addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("True", {type: "flow"}).addOutputInterface("False", {type: "flow"}).addInputInterface("Condition", "", "", {type: "bool"}).build();
     editor.registerNodeType("If/Else", ifNode, "Logic");

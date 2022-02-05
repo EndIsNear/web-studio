@@ -259,3 +259,33 @@ func (n *NodeIfElse) GetCode(funcName string) string {
 func (n *NodeIfElse) HasInputWithID(id int) bool {
 	return id == n.InputFlowID
 }
+
+type NodeSplitFlow struct {
+	CodeGraph *CodeGraph
+
+	InputFlowID int
+	Flow1ID     int
+	FLow2ID     int
+}
+
+func (n *NodeSplitFlow) GetCode(funcName string) string {
+	calleesCode := ""
+
+	funcOne := n.CodeGraph.GetNextFuncName()
+	childNode := n.CodeGraph.GetConnectedNode(n.Flow1ID)
+	if childNode != nil {
+		calleesCode += childNode.GetCode(funcOne)
+	}
+
+	funcTwo := n.CodeGraph.GetNextFuncName()
+	childNode = n.CodeGraph.GetConnectedNode(n.FLow2ID)
+	if childNode != nil {
+		calleesCode += childNode.GetCode(funcTwo)
+	}
+
+	return fmt.Sprintf(`%s %s(); %s();`, calleesCode, funcOne, funcTwo)
+}
+
+func (n *NodeSplitFlow) HasInputWithID(id int) bool {
+	return id == n.InputFlowID
+}
