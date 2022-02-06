@@ -81,7 +81,7 @@ type NodeWriteNumber struct {
 
 func (n *NodeWriteNumber) GetCode(funcName string) string {
 	if n.NumInputConn == -1 {
-		return fmt.Sprintf(`%s=()=>{this.%s=%f;}`, funcName, n.VarName, n.Value)
+		return fmt.Sprintf(`%s=()=>{this.%s=%f};`, funcName, n.VarName, n.Value)
 	}
 
 	calleeFuncName := n.CodeGraph.GetNextFuncName()
@@ -142,7 +142,7 @@ func (n *NodeNumberOperation) GetCode(funcName string) string {
 		childNode2 := n.CodeGraph.GetConnectedNode(n.ConnB)
 		if childNode != nil && childNode2 != nil {
 			calleesCode = childNode.GetCode(calleeFuncName)
-			calleesCode += childNode2.GetCode(calleeFuncName)
+			calleesCode += childNode2.GetCode(calleeFuncName2)
 		}
 
 		opCode = fmt.Sprintf(`%s()%s%s()`, calleeFuncName, n.Operand, calleeFuncName2)
@@ -280,7 +280,7 @@ func (n *NodeIfElse) GetCode(funcName string) string {
 		calleesCode += childNode.GetCode(falseCode)
 	}
 
-	return fmt.Sprintf(`%s if (%s()) {%s()} else {%s()};`, calleesCode, condCode, trueCode, falseCode)
+	return fmt.Sprintf(`%s %s=()=>{if (%s()) {%s()} else {%s()};};`, calleesCode, funcName, condCode, trueCode, falseCode)
 }
 
 func (n *NodeIfElse) HasInputWithID(id int) bool {
@@ -310,7 +310,7 @@ func (n *NodeSplitFlow) GetCode(funcName string) string {
 		calleesCode += childNode.GetCode(funcTwo)
 	}
 
-	return fmt.Sprintf(`%s %s(); %s();`, calleesCode, funcOne, funcTwo)
+	return fmt.Sprintf(`%s %s=()=>{%s(); %s();};`, calleesCode, funcName, funcOne, funcTwo)
 }
 
 func (n *NodeSplitFlow) HasInputWithID(id int) bool {
