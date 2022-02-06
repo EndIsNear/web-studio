@@ -273,13 +273,17 @@ func (c *CodeGraph) parseWriteNumVar(bytes json.RawMessage, idsMap map[string]in
 		return err
 	}
 
-	_, id, err := getIfaceAtIndex(ifaces, 1, "Input", idsMap)
+	inVal, id, err := getIfaceAtIndex(ifaces, 1, "Input", idsMap)
 	if err != nil {
 		return err
 	}
+	inValF, err := strconv.ParseFloat(inVal, 32)
+	if err != nil {
+		inValF = 0.0
+	}
 
 	c.NumVariables[val] = true
-	c.Nodes = append(c.Nodes, &NodeWriteNumber{VarName: val, NumInputConn: id, FlowInput: flowId, CodeGraph: c})
+	c.Nodes = append(c.Nodes, &NodeWriteNumber{VarName: val, NumInputConn: id, FlowInput: flowId, Value: float32(inValF), CodeGraph: c})
 	return nil
 }
 

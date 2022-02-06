@@ -48,7 +48,7 @@ func (n *NodeOnStart) GetCode(_ string) string {
 		calleeCode = childNode.GetCode(calleeFuncName)
 	}
 
-	return fmt.Sprintf(`%s %s();`, calleeCode, calleeFuncName)
+	return fmt.Sprintf(`%s; %s();`, calleeCode, calleeFuncName)
 }
 
 func (n *NodeOnStart) HasInputWithID(id int) bool {
@@ -76,9 +76,14 @@ type NodeWriteNumber struct {
 	VarName      string
 	NumInputConn int
 	FlowInput    int
+	Value        float32
 }
 
 func (n *NodeWriteNumber) GetCode(funcName string) string {
+	if n.NumInputConn == -1 {
+		return fmt.Sprintf(`%s=()=>{this.%s=%f;}`, funcName, n.VarName, n.Value)
+	}
+
 	calleeFuncName := n.CodeGraph.GetNextFuncName()
 
 	calleeCode := ""
