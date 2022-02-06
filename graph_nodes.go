@@ -33,6 +33,28 @@ func (n *NodeOnClick) HasInputWithID(id int) bool {
 	return false
 }
 
+type NodeOnStart struct {
+	OutFlowNode int
+
+	CodeGraph *CodeGraph
+}
+
+func (n *NodeOnStart) GetCode(_ string) string {
+	calleeFuncName := n.CodeGraph.GetNextFuncName()
+
+	calleeCode := ""
+	childNode := n.CodeGraph.GetConnectedNode(n.OutFlowNode)
+	if childNode != nil {
+		calleeCode = childNode.GetCode(calleeFuncName)
+	}
+
+	return fmt.Sprintf(`%s %s();`, calleeCode, calleeFuncName)
+}
+
+func (n *NodeOnStart) HasInputWithID(id int) bool {
+	return false
+}
+
 type NodeReadNumber struct {
 	CodeGraph *CodeGraph
 

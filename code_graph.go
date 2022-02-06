@@ -12,6 +12,7 @@ type GraphConnection struct {
 
 type CodeGraph struct {
 	Nodes         []GraphNode
+	OnClickNodes  []GraphNode
 	StartingNodes []GraphNode
 	NumVariables  map[string]bool
 
@@ -29,12 +30,13 @@ func (c *CodeGraph) Build() string {
 
 	header := `var app=new Vue({el:"#app",data:{`
 	vars := c.BuildVars()
-	callback := `},created:function(){var e=this;setInterval(function(){e.timer++},1e3)`
+	created := `},created:function(){`
+	onStartCode := c.BuildOnStart()
 	mid := `},methods:{`
-	methods := c.BuildMethods()
+	methods := c.BuildOnClick()
 	footer := `}});`
 
-	return fmt.Sprintf("%s%s%s%s%s%s", header, vars, callback, mid, methods, footer)
+	return fmt.Sprintf("%s%s%s%s%s%s%s", header, vars, created, onStartCode, mid, methods, footer)
 }
 
 func (c *CodeGraph) BuildVars() string {
@@ -50,9 +52,18 @@ func (c *CodeGraph) GetNextFuncName() string {
 	return "Func" + strconv.Itoa(c.lastUsedFunction)
 }
 
-func (c *CodeGraph) BuildMethods() string {
-	var res string
+func (c *CodeGraph) BuildOnStart() string {
+	res := ""
 	for _, et := range c.StartingNodes {
+		res += et.GetCode("")
+	}
+
+	return res
+}
+
+func (c *CodeGraph) BuildOnClick() string {
+	var res string
+	for _, et := range c.OnClickNodes {
 		res += et.GetCode("")
 		res += ", "
 	}

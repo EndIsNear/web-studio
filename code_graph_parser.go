@@ -83,6 +83,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 		switch nodeType.Name {
 		case "On click":
 			c.parseOnClick(element, idsMap)
+		case "On start":
+			c.parseOnStart(element, idsMap)
 		case "Read num":
 			c.parseReadNumVar(element, idsMap)
 		case "Write num":
@@ -207,6 +209,25 @@ func (c *CodeGraph) parseOnClick(bytes json.RawMessage, idsMap map[string]int) e
 	}
 
 	node := NodeOnClick{MethodName: val, OutFlowNode: id, CodeGraph: c}
+	c.Nodes = append(c.Nodes, &node)
+	c.OnClickNodes = append(c.OnClickNodes, &node)
+
+	return nil
+}
+
+func (c *CodeGraph) parseOnStart(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, id, err := getIfaceAtIndex(ifaces, 0, "Output", idsMap)
+	if err != nil {
+		return err
+	}
+
+	node := NodeOnStart{OutFlowNode: id, CodeGraph: c}
 	c.Nodes = append(c.Nodes, &node)
 	c.StartingNodes = append(c.StartingNodes, &node)
 
