@@ -13,8 +13,13 @@
     <div class="appcontainer">
         <div id="controlspanel">
             <a href="/coding.html"><button class="ui">Code editor</button></a>
-            <a href="/result/index.html" target="_blank" rel="noopener noreferrer"><button class="ui">View the
-                    result</button></a>
+            <a href="/result/index.html" target="_blank" rel="noopener noreferrer"><button class="ui">View the result</button></a>
+            <h4 id="uitext">Examples</h4>
+            <form>
+                <select id="exampleSelector" class="ui">
+                </select>
+            </form>
+            <button onclick="loadTempalte()" class="ui">Load example</button>
             <h4 id="uitext">To use variables: {{varname}}</h4>
             <button onclick="addButton()" class="ui">Add button</button>
             <button onclick="addHeader()" class="ui">Add header</button>

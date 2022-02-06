@@ -67,8 +67,8 @@ function handleOnMessage(evt) {
     if (evt.data===null || evt.data==="null" || evt.data==="") {
         return;
     }
-    let asd=JSON.parse(evt.data);
-    console.log(editor.load(asd.graph))
+    let msg=JSON.parse(evt.data);
+    editor.load(msg.graph)
 }
 
 function onSave() {

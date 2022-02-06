@@ -2,6 +2,13 @@ var socket;
 
 window.onload = function () {
     socket=openSocket(handleOnMessage);
+    socket.onopen = function () {
+        const message = {
+            messageType: "requestExamples"
+        };
+        socket.send(JSON.stringify(message));
+    };
+
 };
 
 function handleOnMessage (evt) {
@@ -10,6 +17,15 @@ function handleOnMessage (evt) {
         return;
     }
 
+    if (data["messageType"] === "updateHTMLElements") {
+        updateHTMLElemsList(data["elements"]);
+    } else if (data["messageType"] === "examplesList") {
+        updateExamplesList(data["examples"]);
+    }
+
+}
+
+function updateHTMLElemsList(data) {
     parent = document.querySelector("#listelements");
     while (parent.firstChild) {
          parent.removeChild(parent.firstChild);
@@ -88,6 +104,27 @@ function addHeader() {
             messageType: "newHTMLElement",
             type: "Header",
             label: text
+        };
+        send(JSON.stringify(msg));
+    }
+}
+
+function updateExamplesList(data) {
+    var parent = document.getElementById("exampleSelector");
+    data.forEach(function (val) {
+        var opt = document.createElement('option');
+        opt.value = val;
+        opt.innerHTML = val;
+        parent.appendChild(opt);
+    });
+}
+
+function loadTempalte() {
+    var e = document.getElementById("exampleSelector");
+    if (e != null) {
+        const msg = {
+            messageType: "loadExample",
+            name: e.value
         };
         send(JSON.stringify(msg));
     }

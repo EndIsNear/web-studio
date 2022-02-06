@@ -24,11 +24,13 @@ type SiteBuilder struct {
 	lastUsedID   uint
 	htmlElements []HTMLElement
 
-	Graph CodeGraph
+	Graph      CodeGraph
+	savedGraph string
 }
 
 func (b *SiteBuilder) Init() {
 	b.Graph.Init()
+	b.savedGraph = ""
 }
 
 func (b *SiteBuilder) ServeHTML(res http.ResponseWriter, req *http.Request) {
@@ -62,6 +64,7 @@ func (b *SiteBuilder) ServeJS(res http.ResponseWriter, req *http.Request) {
 
 func (b *SiteBuilder) NewHTMLElement(jsonReq string) {
 	var request HTMLElementJSON
+	println(string(jsonReq))
 	err := json.Unmarshal([]byte(jsonReq), &request)
 	if err != nil {
 		log.Printf("Erron NewHTMLElement json unmarshal: %v", err)
@@ -99,7 +102,34 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 	}
 }
 
+func (b *SiteBuilder) LoadExample(jsonReq string) {
+	type LoadExampleMessage struct {
+		Name string `json:"name"`
+	}
+
+	var request LoadExampleMessage
+	err := json.Unmarshal([]byte(jsonReq), &request)
+	if err != nil {
+		log.Printf("Erron LoadExample json unmarshal: %v", err)
+	}
+
+	site, ok := SiteExamplesList[request.Name]
+	if ok {
+		b.htmlElements = make([]HTMLElement, 0)
+
+		for _, et := range site.HTMLElements {
+			b.NewHTMLElement(et)
+		}
+
+		b.BlueprintUpdate(site.CodeGraph)
+	}
+
+}
+
 func (b *SiteBuilder) BlueprintUpdate(jsonReq string) {
+	println(string(jsonReq))
+	b.savedGraph = string(jsonReq)
+
 	var request BluprintUpdateMessage
 	request.Graph.Init()
 	err := json.Unmarshal([]byte(jsonReq), &request)
@@ -110,6 +140,6 @@ func (b *SiteBuilder) BlueprintUpdate(jsonReq string) {
 	b.Graph = request.Graph
 }
 
-func (b *SiteBuilder) GetAllHTMLElementsAsJSON() ([]byte, error) {
-	return json.Marshal(b.htmlElements)
+func (b *SiteBuilder) GetAllHTMLElements() []HTMLElement {
+	return b.htmlElements
 }

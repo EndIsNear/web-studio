@@ -14,7 +14,6 @@ type InterfacePropsJSON struct {
 }
 
 func (c *CodeGraph) UnmarshalJSON(bytes []byte) error {
-	println(string(bytes))
 	var data map[string]*json.RawMessage
 	err := json.Unmarshal(bytes, &data)
 	if err != nil {

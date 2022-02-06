@@ -12,15 +12,12 @@ type SocketHander struct {
 	siteBuilder *SiteBuilder
 	upgrader    websocket.Upgrader
 	conn        *websocket.Conn
-
-	savedGraph string
 }
 
 func (s *SocketHander) Init(siteBuilder *SiteBuilder) {
 	s.siteBuilder = siteBuilder
 	s.upgrader = websocket.Upgrader{}
 	s.conn = nil
-	s.savedGraph = ""
 }
 
 func (s *SocketHander) Listen(w http.ResponseWriter, r *http.Request) {
@@ -64,32 +61,74 @@ func (s *SocketHander) HandleReadTextMessage(message []byte) {
 	case "deleteHTMLElement":
 		s.siteBuilder.DeleteHTMLElement(string(message))
 		s.SendHTMLElements()
+	case "loadExample":
+		s.siteBuilder.LoadExample(string(message))
+		s.SendHTMLElements()
 	case "updateBluprint":
-		s.savedGraph = string(message)
 		s.siteBuilder.BlueprintUpdate(string(message))
 	case "requestGraphSave":
 		s.SendSavedCodeGraphJSON()
+	case "requestExamples":
+		s.SendAvailableExamplesNames()
 	default:
 		log.Printf("The given %s messageType can't be found", val)
 	}
 }
 
 func (s *SocketHander) SendHTMLElements() {
-	// check if connection is open
-	message, err := s.siteBuilder.GetAllHTMLElementsAsJSON()
+	type HTMLElementsMessage struct {
+		Type     string        `json:"messageType"`
+		Elements []HTMLElement `json:"elements"`
+	}
+	message := HTMLElementsMessage{
+		Elements: s.siteBuilder.GetAllHTMLElements(),
+		Type:     "updateHTMLElements",
+	}
+
+	json, err := json.Marshal(message)
 	if err != nil {
 		log.Printf("While marshling all html elements: %v", err)
 	}
 
-	err = s.conn.WriteMessage(websocket.TextMessage, message)
+	err = s.conn.WriteMessage(websocket.TextMessage, json)
 	if err != nil {
 		log.Println("Error during message writing:", err)
 	}
 }
 
 func (s *SocketHander) SendSavedCodeGraphJSON() {
-	err := s.conn.WriteMessage(websocket.TextMessage, []byte(s.savedGraph))
+	err := s.conn.WriteMessage(websocket.TextMessage, []byte(s.siteBuilder.savedGraph))
 	if err != nil {
 		log.Println("Error during sending saved graph:", err)
+	}
+}
+
+func (s *SocketHander) SendAvailableExamplesNames() {
+	type ExamplesMessage struct {
+		Type     string   `json:"messageType"`
+		Examples []string `json:"examples"`
+	}
+
+	//build the list
+	keys := make([]string, len(SiteExamplesList))
+	i := 0
+	for k := range SiteExamplesList {
+		keys[i] = k
+		i++
+	}
+
+	message := ExamplesMessage{
+		Type:     "examplesList",
+		Examples: keys,
+	}
+
+	json, err := json.Marshal(message)
+	if err != nil {
+		log.Printf("While marshling all html elements: %v", err)
+	}
+
+	err = s.conn.WriteMessage(websocket.TextMessage, json)
+	if err != nil {
+		log.Println("Error during sending examples list:", err)
 	}
 }
