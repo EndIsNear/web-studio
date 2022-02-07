@@ -49,13 +49,13 @@ func (c *CodeGraph) BuildVars() string {
 
 func (c *CodeGraph) GetNextFuncName() string {
 	c.lastUsedFunction++
-	return "Func" + strconv.Itoa(c.lastUsedFunction)
+	return "N" + strconv.Itoa(c.lastUsedFunction)
 }
 
 func (c *CodeGraph) BuildOnStart() string {
 	res := ""
 	for _, et := range c.StartingNodes {
-		res += et.GetCode("")
+		res += et.GetCode(nil)
 	}
 
 	return res
@@ -64,7 +64,7 @@ func (c *CodeGraph) BuildOnStart() string {
 func (c *CodeGraph) BuildOnClick() string {
 	var res string
 	for _, et := range c.OnClickNodes {
-		res += et.GetCode("")
+		res += et.GetCode(nil)
 		res += ", "
 	}
 
