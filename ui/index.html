@@ -14,6 +14,15 @@
         <div id="controlspanel">
             <a href="/coding.html"><button class="ui">Code editor</button></a>
             <a href="/result/index.html" target="_blank" rel="noopener noreferrer"><button class="ui">View the result</button></a>
+            <h4 id="uitext">Options:</h4>
+            <div>
+                <input type="checkbox" id="cssEnabled" name="cssEnabled" onclick="onCSSSwitched(this)" checked>
+                <label for="cssEnabled">CSS (Styling)</label>
+            </div>
+            <div>
+                <input type="checkbox" id="canvasEnabled" name="canvasEnabled" onclick="onCanvasSwitched(this)">
+                <label for="canvasEnabled">Canvas (Drawing)</label>
+            </div>
             <h4 id="uitext">Examples</h4>
             <form>
                 <select id="exampleSelector" class="ui">

@@ -25,18 +25,23 @@ func (c *CodeGraph) Init() {
 	c.NumVariables = make(map[string]bool)
 }
 
-func (c *CodeGraph) Build() string {
+func (c *CodeGraph) Build(initCanvas bool) string {
 	c.lastUsedFunction = 0
 
 	header := `var app=new Vue({el:"#app",data:{`
 	vars := c.BuildVars()
 	created := `},created:function(){`
+	canvasInitCode := ``
 	onStartCode := c.BuildOnStart()
 	mid := `},methods:{`
 	methods := c.BuildOnClick()
 	footer := `}});`
 
-	return fmt.Sprintf("%s%s%s%s%s%s%s", header, vars, created, onStartCode, mid, methods, footer)
+	if initCanvas {
+		canvasInitCode = `c = document.getElementById("myCanvas");c.width = document.body.clientWidth * 0.7;c.height = document.body.clientHeight * 0.9;`
+	}
+
+	return fmt.Sprintf("%s%s%s%s%s%s%s%s", header, vars, created, canvasInitCode, onStartCode, mid, methods, footer)
 }
 
 func (c *CodeGraph) BuildVars() string {

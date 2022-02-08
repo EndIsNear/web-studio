@@ -19,13 +19,24 @@ function handleOnMessage (evt) {
 
     if (data["messageType"] === "updateHTMLElements") {
         updateHTMLElemsList(data["elements"]);
+        updateOptions(data["cssEnabled"], data["canvasEnabled"])
     } else if (data["messageType"] === "examplesList") {
         updateExamplesList(data["examples"]);
     }
 
 }
 
+function updateOptions(cssEn, canvasEn) {
+    var checkbox = document.getElementById("cssEnabled");
+    checkbox.checked = cssEn;
+    checkbox = document.getElementById("canvasEnabled");
+    checkbox.checked = canvasEn;
+
+}
 function updateHTMLElemsList(data) {
+    if (data===null) {
+        return;
+    }
     parent = document.querySelector("#listelements");
     while (parent.firstChild) {
          parent.removeChild(parent.firstChild);
@@ -64,11 +75,11 @@ function send(message) {
     }
     socket.send(message);
 
-    // hack to refresh the page without anycallbacks
+    // hack to refresh the page without any callbacks
     setTimeout(
         function () {
             document.getElementById('viewport').src += '';
-        }, 100
+        }, 200
     );
 }
 
@@ -117,6 +128,26 @@ function updateExamplesList(data) {
         opt.innerHTML = val;
         parent.appendChild(opt);
     });
+}
+
+function onCSSSwitched(checkbox) {
+    if (checkbox != null) {
+        const msg = {
+            messageType: "cssEnabledUpdate",
+            enabled: checkbox.checked,
+        };
+        send(JSON.stringify(msg));
+    }
+}
+
+function onCanvasSwitched(checkbox) {
+    if (checkbox != null) {
+        const msg = {
+            messageType: "canvasEnabledUpdate",
+            enabled: checkbox.checked,
+        };
+        send(JSON.stringify(msg));
+    }
 }
 
 function loadTempalte() {

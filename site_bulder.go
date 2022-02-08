@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type HTMLElementJSON struct {
@@ -15,50 +16,67 @@ type HTMLElementJSON struct {
 	Id          string `json:"id"`
 }
 
+type SwitchValueJSON struct {
+	Enabled bool `json:"enabled"`
+}
+
 type BluprintUpdateMessage struct {
 	Name  string    `json:"blueprintName"`
 	Graph CodeGraph `json:"graph"`
 }
 
 type SiteBuilder struct {
-	lastUsedID   uint
-	htmlElements []HTMLElement
+	lastUsedID    uint
+	htmlElements  []HTMLElement
+	CSSEnabled    bool
+	CanvasEnabled bool
 
 	Graph      CodeGraph
 	savedGraph string
 }
 
 func (b *SiteBuilder) Init() {
+	b.CSSEnabled = true
 	b.Graph.Init()
 	b.savedGraph = ""
 }
 
 func (b *SiteBuilder) ServeHTML(res http.ResponseWriter, req *http.Request) {
-	header := `<!DOCTYPE html><html lang="en"><head><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script><title>Awesome website 2k22</title></head><body><div id="app">`
-	body := `<h1>You can add items here! Can you?!</h1>`
-	footer := `</div><script src="script.js"></script></body></html>`
+	header := `<!DOCTYPE html><html lang="en"><head><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script><title>Awesome website 2k22</title></head><body>`
+	body := `<div id="app"><h1>You can add items here!</h1></div>`
+	footer := `<script src="script.js"></script></body></html>`
 
-	if len(b.htmlElements) > 0 {
-		body = ""
-	}
-	for _, elem := range b.htmlElements {
-		body += elem.ToString()
-	}
+	if len(b.htmlElements) > 0 || b.CanvasEnabled {
+		body = `<div id="app">`
 
+		for _, elem := range b.htmlElements {
+			body += elem.ToString()
+		}
+		body += `</div>`
+		if b.CanvasEnabled {
+			body += `<canvas id="myCanvas" width="200px" height="200px" style="border:3px solid black;"></canvas>`
+		}
+	}
 	fmt.Fprintf(res, "%s%s%s", header, body, footer)
 }
 
 func (b *SiteBuilder) ServeCSS(res http.ResponseWriter, req *http.Request) {
+	if !b.CSSEnabled {
+		fmt.Fprint(res, "")
+	}
 	res.Header().Set("Content-Type", "text/css")
-	header := `*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}#app{width:100vh;height:100vh;margin:auto;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}h1{margin:1rem;font-weight:400}button{margin:.1rem;cursor:pointer;display:inline-block;background:#333;color:#fff;font-size:18px;border:0;padding:1rem 1.5rem}button:hover{transform:scale(.98)}button:active{transform:scale(1)}`
-	body := ``
-	footer := ``
+	mainCss := `*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}#app{width:100vw;height:100vh;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}h1{margin:1rem;font-weight:400}button{margin:.1rem;cursor:pointer;display:inline-block;background:#333;color:#fff;font-size:18px;border:0;padding:1rem 1.5rem}button:hover{transform:scale(.98)}button:active{transform:scale(1)}`
+	canvasCSS := ``
+	if b.CanvasEnabled {
+		mainCss = strings.Replace(mainCss, `width:100vw`, `width:20vw`, 1)
+		canvasCSS = `body { display: flex; }`
+	}
 
-	fmt.Fprintf(res, "%s%s%s", header, body, footer)
+	fmt.Fprintf(res, "%s%s", mainCss, canvasCSS)
 }
 
 func (b *SiteBuilder) ServeJS(res http.ResponseWriter, req *http.Request) {
-	code := b.Graph.Build()
+	code := b.Graph.Build(b.CanvasEnabled)
 	fmt.Fprintf(res, "%s", code)
 }
 
@@ -100,6 +118,24 @@ func (b *SiteBuilder) DeleteHTMLElement(jsonReq string) {
 			break
 		}
 	}
+}
+
+func (b *SiteBuilder) UpdateCSSEnabled(jsonReq string) {
+	var request SwitchValueJSON
+	err := json.Unmarshal([]byte(jsonReq), &request)
+	if err != nil {
+		log.Printf("Erron DeleteHTMLElement json unmarshal: %v", err)
+	}
+	b.CSSEnabled = request.Enabled
+}
+
+func (b *SiteBuilder) UpdateCanvasEnabled(jsonReq string) {
+	var request SwitchValueJSON
+	err := json.Unmarshal([]byte(jsonReq), &request)
+	if err != nil {
+		log.Printf("Erron DeleteHTMLElement json unmarshal: %v", err)
+	}
+	b.CanvasEnabled = request.Enabled
 }
 
 func (b *SiteBuilder) LoadExample(jsonReq string) {

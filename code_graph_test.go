@@ -14,7 +14,7 @@ func TestBuildSimpleGraph(t *testing.T) {
 		t.Error("Cant unmarshal by array")
 	}
 
-	jsCode := graph.Build()
+	jsCode := graph.Build(false)
 	if jsCode != `var app=new Vue({el:"#app",data:{timer:0},created:function(){var e=this;setInterval(function(){e.timer++},1e3)},methods:{}});` {
 		t.Errorf("Wrong code: %s", jsCode)
 	}
@@ -29,7 +29,7 @@ func TestBuildSimpleGraph2(t *testing.T) {
 		t.Error("Cant unmarshal by array")
 	}
 
-	jsCode := graph.Build()
+	jsCode := graph.Build(false)
 	if jsCode != `var app=new Vue({el:"#app",data:{timer:0},created:function(){var e=this;setInterval(function(){e.timer++},1e3)},methods:{}});` {
 		t.Errorf("Wrong code: %s", jsCode)
 	}
@@ -44,7 +44,7 @@ func TestBuildSimpleGraph3(t *testing.T) {
 		t.Error("Cant unmarshal by array")
 	}
 
-	jsCode := graph.Build()
+	jsCode := graph.Build(false)
 	if jsCode != `var app=new Vue({el:"#app",data:{timer:0},created:function(){var e=this;setInterval(function(){e.timer++},1e3)},methods:{}});` {
 		t.Errorf("Wrong code: %s", jsCode)
 	}

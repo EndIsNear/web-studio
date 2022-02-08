@@ -61,6 +61,10 @@ func (s *SocketHander) HandleReadTextMessage(message []byte) {
 	case "deleteHTMLElement":
 		s.siteBuilder.DeleteHTMLElement(string(message))
 		s.SendHTMLElements()
+	case "cssEnabledUpdate":
+		s.siteBuilder.UpdateCSSEnabled(string(message))
+	case "canvasEnabledUpdate":
+		s.siteBuilder.UpdateCanvasEnabled(string(message))
 	case "loadExample":
 		s.siteBuilder.LoadExample(string(message))
 		s.SendHTMLElements()
@@ -77,12 +81,16 @@ func (s *SocketHander) HandleReadTextMessage(message []byte) {
 
 func (s *SocketHander) SendHTMLElements() {
 	type HTMLElementsMessage struct {
-		Type     string        `json:"messageType"`
-		Elements []HTMLElement `json:"elements"`
+		Type          string        `json:"messageType"`
+		CSSEnabled    bool          `json:"cssEnabled"`
+		CanvasEnabled bool          `json:"canvasEnabled"`
+		Elements      []HTMLElement `json:"elements"`
 	}
 	message := HTMLElementsMessage{
-		Elements: s.siteBuilder.GetAllHTMLElements(),
-		Type:     "updateHTMLElements",
+		Elements:      s.siteBuilder.GetAllHTMLElements(),
+		Type:          "updateHTMLElements",
+		CSSEnabled:    s.siteBuilder.CSSEnabled,
+		CanvasEnabled: s.siteBuilder.CanvasEnabled,
 	}
 
 	json, err := json.Marshal(message)
