@@ -69,7 +69,7 @@ func (b *SiteBuilder) ServeCSS(res http.ResponseWriter, req *http.Request) {
 	canvasCSS := ``
 	if b.CanvasEnabled {
 		mainCss = strings.Replace(mainCss, `width:100vw`, `width:20vw`, 1)
-		canvasCSS = `body { display: flex; }`
+		canvasCSS = `body { display: flex; align-items: flex-start; }`
 	}
 
 	fmt.Fprintf(res, "%s%s", mainCss, canvasCSS)
@@ -158,6 +158,7 @@ func (b *SiteBuilder) LoadExample(jsonReq string) {
 		}
 
 		b.BlueprintUpdate(site.CodeGraph)
+		b.CanvasEnabled = site.CanvasEnabled
 	}
 
 }
