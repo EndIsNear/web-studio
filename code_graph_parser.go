@@ -85,6 +85,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseOnClick(element, idsMap)
 		case "On start":
 			c.parseOnStart(element, idsMap)
+		case "On timer":
+			c.parseTimer(element, idsMap)
 		case "Read num":
 			c.parseReadNumVar(element, idsMap)
 		case "Write num":
@@ -131,7 +133,7 @@ func getOptAtIndex(opts []json.RawMessage, index uint, expectedName string) (nam
 	val = ""
 	err = nil
 
-	var opt []string
+	var opt []interface{}
 	if err = json.Unmarshal(opts[index], &opt); err != nil {
 		return
 	}
@@ -140,8 +142,8 @@ func getOptAtIndex(opts []json.RawMessage, index uint, expectedName string) (nam
 		return
 	}
 
-	name = opt[0]
-	val = opt[1]
+	name = fmt.Sprintf("%v", opt[0])
+	val = fmt.Sprintf("%v", opt[1])
 
 	return
 }
@@ -210,7 +212,7 @@ func (c *CodeGraph) parseOnClick(bytes json.RawMessage, idsMap map[string]int) e
 
 	node := NodeOnClick{MethodName: val, OutFlowNode: id, CodeGraph: c}
 	c.Nodes = append(c.Nodes, &node)
-	c.OnClickNodes = append(c.OnClickNodes, &node)
+	c.MethodsNodes = append(c.MethodsNodes, &node)
 
 	return nil
 }
@@ -229,7 +231,36 @@ func (c *CodeGraph) parseOnStart(bytes json.RawMessage, idsMap map[string]int) e
 
 	node := NodeOnStart{OutFlowNode: id, CodeGraph: c}
 	c.Nodes = append(c.Nodes, &node)
-	c.StartingNodes = append(c.StartingNodes, &node)
+	c.CreatedNodes = append(c.CreatedNodes, &node)
+
+	return nil
+}
+
+func (c *CodeGraph) parseTimer(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Interval")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	intVal, err := strconv.Atoi(val)
+	if err != nil {
+		return err
+	}
+
+	_, id, err := getIfaceAtIndex(ifaces, 0, "Output", idsMap)
+	if err != nil {
+		return err
+	}
+
+	node := NodeOnTimer{OutFlowNode: id, Interval: intVal, CodeGraph: c}
+	c.Nodes = append(c.Nodes, &node)
+	c.CreatedNodes = append(c.CreatedNodes, &node)
 
 	return nil
 }

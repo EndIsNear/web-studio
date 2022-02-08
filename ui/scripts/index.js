@@ -122,6 +122,8 @@ function addHeader() {
 
 function updateExamplesList(data) {
     var parent = document.getElementById("exampleSelector");
+
+    data.sort();
     data.forEach(function (val) {
         var opt = document.createElement('option');
         opt.value = val;

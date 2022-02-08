@@ -57,6 +57,29 @@ func (n *NodeOnStart) HasInputWithID(id int) bool {
 	return false
 }
 
+type NodeOnTimer struct {
+	OutFlowNode int
+	Interval    int
+
+	CodeGraph *CodeGraph
+}
+
+func (n *NodeOnTimer) GetCode(_ *string) string {
+	arrowFunctions := ""
+
+	calleeCode := ""
+	childNode := n.CodeGraph.GetConnectedNode(n.OutFlowNode)
+	if childNode != nil {
+		calleeCode = childNode.GetCode(&arrowFunctions)
+	}
+
+	return fmt.Sprintf(`%s setInterval(()=>{%s}, %d);`, arrowFunctions, calleeCode, n.Interval)
+}
+
+func (n *NodeOnTimer) HasInputWithID(id int) bool {
+	return false
+}
+
 type NodeReadNumber struct {
 	CodeGraph *CodeGraph
 

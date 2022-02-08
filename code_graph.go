@@ -11,10 +11,10 @@ type GraphConnection struct {
 }
 
 type CodeGraph struct {
-	Nodes         []GraphNode
-	OnClickNodes  []GraphNode
-	StartingNodes []GraphNode
-	NumVariables  map[string]bool
+	Nodes        []GraphNode
+	MethodsNodes []GraphNode
+	CreatedNodes []GraphNode
+	NumVariables map[string]bool
 
 	Connections []GraphConnection
 
@@ -59,7 +59,7 @@ func (c *CodeGraph) GetNextFuncName() string {
 
 func (c *CodeGraph) BuildOnStart() string {
 	res := ""
-	for _, et := range c.StartingNodes {
+	for _, et := range c.CreatedNodes {
 		res += et.GetCode(nil)
 	}
 
@@ -68,7 +68,7 @@ func (c *CodeGraph) BuildOnStart() string {
 
 func (c *CodeGraph) BuildOnClick() string {
 	var res string
-	for _, et := range c.OnClickNodes {
+	for _, et := range c.MethodsNodes {
 		res += et.GetCode(nil)
 		res += ", "
 	}
