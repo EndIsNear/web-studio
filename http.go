@@ -56,6 +56,7 @@ func (h *HTTPServer) createNewServer(addr string) {
 
 	mux.Handle("/styles/", http.StripPrefix("/styles/", http.FileServer(http.Dir("./ui/styles"))))
 	mux.Handle("/scripts/", http.StripPrefix("/scripts/", http.FileServer(http.Dir("./ui/scripts"))))
+	mux.Handle("/external/", http.StripPrefix("/external/", http.FileServer(http.Dir("./ui/external"))))
 	mux.HandleFunc("/coding.html", func(res http.ResponseWriter, req *http.Request) {
 		http.ServeFile(res, req, "ui/coding.html")
 	})

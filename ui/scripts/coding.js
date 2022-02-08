@@ -66,11 +66,14 @@ function InitNodeEditor() {
 }
 
 function handleOnMessage(evt) {
-    if (evt.data===null || evt.data==="null" || evt.data==="") {
+    if (evt.data===null || evt.data==="null" || evt.data==="" || evt.data==="connected") {
         return;
     }
+
     let msg=JSON.parse(evt.data);
-    editor.load(msg.graph)
+    if(msg.messageType==="updateBluprint") {
+        editor.load(msg.graph)
+    }
 }
 
 function onSave() {
