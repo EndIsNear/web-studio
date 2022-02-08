@@ -29,7 +29,7 @@ func (c *CodeGraph) Build(initCanvas bool) string {
 	c.lastUsedFunction = 0
 
 	header := `var app=new Vue({el:"#app",data:{`
-	vars := c.BuildVars()
+	vars := c.BuildVars(initCanvas)
 	created := `},created:function(){`
 	canvasInitCode := ``
 	onStartCode := c.BuildOnStart()
@@ -38,17 +38,23 @@ func (c *CodeGraph) Build(initCanvas bool) string {
 	footer := `}});`
 
 	if initCanvas {
-		canvasInitCode = `c = document.getElementById("myCanvas");c.width = document.body.clientWidth * 0.7;c.height = document.body.clientHeight * 0.9;`
+		canvasInitCode = `c = document.getElementById("myCanvas"); this.CANVAS_CONTEXT = c.getContext('2d'); c.width = this.CANVAS_W = document.body.clientWidth * 0.7; c.height = this.CANVAS_H = document.body.clientHeight * 0.9;`
 	}
 
 	return fmt.Sprintf("%s%s%s%s%s%s%s%s", header, vars, created, canvasInitCode, onStartCode, mid, methods, footer)
 }
 
-func (c *CodeGraph) BuildVars() string {
+func (c *CodeGraph) BuildVars(initCanvas bool) string {
 	result := ``
+
+	if initCanvas {
+		result = `CANVAS_W: 0, CANVAS_H: 0, CANVAS_CONTEXT: null, `
+	}
+
 	for key := range c.NumVariables {
 		result += fmt.Sprintf(`%s: 0, `, key)
 	}
+
 	return result
 }
 

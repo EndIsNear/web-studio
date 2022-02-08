@@ -62,7 +62,21 @@ function InitNodeEditor() {
     .addInputInterface("A", "NumberOption", "", {type: "int"}).addInputInterface("B", "NumberOption", "", {type: "int"})
     .addOutputInterface("Result", {type: "bool"}).build();
     editor.registerNodeType("Compare num", compInt, "Number");
-    
+
+    // Draw nodes
+    const drawRect = new BaklavaJS.Core.NodeBuilder("Draw rectangle")
+    .addInputInterface("Input Flow", "", "", {type: "flow"})
+    .addInputInterface("X", "NumberOption", "", {type: "int"}).addInputInterface("Y", "NumberOption", "", {type: "int"})
+    .addInputInterface("Width", "NumberOption", "", {type: "int"}).addInputInterface("Height", "NumberOption", "", {type: "int"})
+    .build();
+    editor.registerNodeType("Draw rectangle", drawRect, "Drawing");
+
+    const clearRect = new BaklavaJS.Core.NodeBuilder("Clear rectangle")
+    .addInputInterface("Input Flow", "", "", {type: "flow"})
+    .addInputInterface("X", "NumberOption", "", {type: "int"}).addInputInterface("Y", "NumberOption", "", {type: "int"})
+    .addInputInterface("Width", "NumberOption", "", {type: "int"}).addInputInterface("Height", "NumberOption", "", {type: "int"})
+    .build();
+    editor.registerNodeType("Clear rectangle", clearRect, "Drawing");
 
     // BOOL
     //"AND(&&)", "OR(||)"

@@ -316,3 +316,76 @@ func (n *NodeSplitFlow) GetCode(arrowFuncs *string) string {
 func (n *NodeSplitFlow) HasInputWithID(id int) bool {
 	return id == n.InputFlowID
 }
+
+type NodeDrawRectangle struct {
+	CodeGraph *CodeGraph
+
+	FlowInput int
+
+	Operation string
+	ValueX    float32
+	ValueY    float32
+	ValueW    float32
+	ValueH    float32
+	ConnX     int
+	ConnY     int
+	ConnW     int
+	ConnH     int
+}
+
+func (n *NodeDrawRectangle) GetCode(arrowFuncs *string) string {
+	var valX string
+	var valY string
+	var valW string
+	var valH string
+
+	funcName := "DrawRect" + n.CodeGraph.GetNextFuncName()
+
+	if n.ConnX == -1 {
+		valX = fmt.Sprintf("%f", n.ValueX)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnX)
+		if childNode != nil {
+			valX = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnY == -1 {
+		valY = fmt.Sprintf("%f", n.ValueY)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnY)
+		if childNode != nil {
+			valY = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnW == -1 {
+		valW = fmt.Sprintf("%f", n.ValueW)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnW)
+		if childNode != nil {
+			valW = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnH == -1 {
+		valH = fmt.Sprintf("%f", n.ValueH)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnH)
+		if childNode != nil {
+			valH = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	methodName := `fillRect`
+	if n.Operation == "Clear" {
+		methodName = `clearRect`
+	}
+
+	*arrowFuncs += fmt.Sprintf(`%s=()=>{ let x=%s; let y=%s; let w=%s; let h=%s; this.CANVAS_CONTEXT.%s(x, y, w, h);};`, funcName, valX, valY, valW, valH, methodName)
+	return fmt.Sprintf(`%s()`, funcName)
+}
+
+func (n *NodeDrawRectangle) HasInputWithID(id int) bool {
+	return id == n.FlowInput
+}

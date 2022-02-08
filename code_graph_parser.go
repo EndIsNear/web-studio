@@ -101,6 +101,10 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseNumComparison(element, idsMap)
 		case "Split flow":
 			c.parseSplitFLow(element, idsMap)
+		case "Draw rectangle":
+			c.parseFillRect(element, idsMap, "Draw")
+		case "Clear rectangle":
+			c.parseFillRect(element, idsMap, "Clear")
 		default:
 			return errors.New("unknown node type while CodeGraph unmarshal")
 		}
@@ -546,6 +550,70 @@ func (c *CodeGraph) parseSplitFLow(bytes json.RawMessage, idsMap map[string]int)
 		InputFlowID: inputID,
 		Flow1ID:     oneID,
 		FLow2ID:     twoID,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseFillRect(bytes json.RawMessage, idsMap map[string]int, operation string) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, flowId, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+
+	xValS, xID, err := getIfaceAtIndex(ifaces, 1, "X", idsMap)
+	if err != nil {
+		return err
+	}
+	xValF, err := strconv.ParseFloat(xValS, 32)
+	if err != nil {
+		xValF = 0.0
+	}
+
+	yValS, yID, err := getIfaceAtIndex(ifaces, 2, "Y", idsMap)
+	if err != nil {
+		return err
+	}
+	yValF, err := strconv.ParseFloat(yValS, 32)
+	if err != nil {
+		yValF = 0.0
+	}
+
+	wValS, wID, err := getIfaceAtIndex(ifaces, 3, "Width", idsMap)
+	if err != nil {
+		return err
+	}
+	wValF, err := strconv.ParseFloat(wValS, 32)
+	if err != nil {
+		wValF = 0.0
+	}
+
+	hValS, hID, err := getIfaceAtIndex(ifaces, 4, "Height", idsMap)
+	if err != nil {
+		return err
+	}
+	hValF, err := strconv.ParseFloat(hValS, 32)
+	if err != nil {
+		hValF = 0.0
+	}
+
+	c.Nodes = append(c.Nodes, &NodeDrawRectangle{
+		CodeGraph: c,
+		FlowInput: flowId,
+		ValueX:    float32(xValF),
+		ValueY:    float32(yValF),
+		ValueW:    float32(wValF),
+		ValueH:    float32(hValF),
+		ConnX:     xID,
+		ConnY:     yID,
+		ConnW:     wID,
+		ConnH:     hID,
+		Operation: operation,
 	})
 	return nil
 }
