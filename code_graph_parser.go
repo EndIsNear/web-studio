@@ -101,6 +101,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseNumOperation(element, idsMap)
 		case "If/Else":
 			c.parseIfElse(element, idsMap)
+		case "For loop":
+			c.parseForLoop(element, idsMap)
 		case "Compare num":
 			c.parseNumComparison(element, idsMap)
 		case "Split flow":
@@ -590,6 +592,40 @@ func (c *CodeGraph) parseIfElse(bytes json.RawMessage, idsMap map[string]int) er
 		InputFlowID: inputID,
 		TrueFlowID:  trueID,
 		FalseFlowID: falseID,
+		ConditionID: condID,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseForLoop(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, inputID, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+	_, initID, err := getIfaceAtIndex(ifaces, 1, "Initialization", idsMap)
+	if err != nil {
+		return err
+	}
+	_, loopID, err := getIfaceAtIndex(ifaces, 2, "Loop flow", idsMap)
+	if err != nil {
+		return err
+	}
+	_, condID, err := getIfaceAtIndex(ifaces, 3, "Condition", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.Nodes = append(c.Nodes, &NodeForLoop{
+		CodeGraph:   c,
+		InputFlowID: inputID,
+		InitFlowID:  initID,
+		LoopFlowID:  loopID,
 		ConditionID: condID,
 	})
 	return nil

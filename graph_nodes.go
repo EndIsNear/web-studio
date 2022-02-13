@@ -131,7 +131,7 @@ func (n *NodeWriteNumber) GetCode(arrowFuncs *string) string {
 	funcName := "WriteNum" + n.CodeGraph.GetNextFuncName()
 	if n.NumInputConn == -1 {
 		*arrowFuncs += fmt.Sprintf(`%s=()=>{this.%s=%f};`, funcName, n.VarName, n.Value)
-		return fmt.Sprintf(`%s();`, funcName)
+		return fmt.Sprintf(`%s()`, funcName)
 	}
 
 	calleeCode := ""
@@ -141,7 +141,7 @@ func (n *NodeWriteNumber) GetCode(arrowFuncs *string) string {
 	}
 
 	*arrowFuncs += fmt.Sprintf(`%s=()=>{this.%s=%s};`, funcName, n.VarName, calleeCode)
-	return fmt.Sprintf(`%s();`, funcName)
+	return fmt.Sprintf(`%s()`, funcName)
 }
 
 func (n *NodeWriteNumber) HasInputWithID(id int) bool {
@@ -336,6 +336,45 @@ func (n *NodeIfElse) GetCode(arrowFuncs *string) string {
 }
 
 func (n *NodeIfElse) HasInputWithID(id int) bool {
+	return id == n.InputFlowID
+}
+
+type NodeForLoop struct {
+	CodeGraph *CodeGraph
+
+	InputFlowID int
+	InitFlowID  int
+	LoopFlowID  int
+
+	ConditionID int
+}
+
+func (n *NodeForLoop) GetCode(arrowFuncs *string) string {
+	condCode := ""
+	initCode := ""
+	loopCode := ""
+
+	childNode := n.CodeGraph.GetConnectedNode(n.ConditionID)
+	if childNode != nil {
+		condCode = childNode.GetCode(arrowFuncs)
+	}
+
+	childNode = n.CodeGraph.GetConnectedNode(n.InitFlowID)
+	if childNode != nil {
+		initCode = childNode.GetCode(arrowFuncs)
+	}
+
+	childNode = n.CodeGraph.GetConnectedNode(n.LoopFlowID)
+	if childNode != nil {
+		loopCode = childNode.GetCode(arrowFuncs)
+	}
+
+	funcName := "IfElse" + n.CodeGraph.GetNextFuncName()
+	*arrowFuncs += fmt.Sprintf(`%s=()=>{for(%s;%s;) { %s }};`, funcName, initCode, condCode, loopCode)
+	return fmt.Sprintf(`%s()`, funcName)
+}
+
+func (n *NodeForLoop) HasInputWithID(id int) bool {
 	return id == n.InputFlowID
 }
 
