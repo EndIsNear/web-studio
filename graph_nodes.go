@@ -35,6 +35,29 @@ func (n *NodeOnClick) HasInputWithID(id int) bool {
 	return false
 }
 
+type NodeOnCanvasClick struct {
+	OutFlowNode int
+	VarName     string
+
+	CodeGraph *CodeGraph
+}
+
+func (n *NodeOnCanvasClick) GetCode(_ *string) string {
+	arrowFunctions := ""
+
+	calleeCode := ""
+	childNode := n.CodeGraph.GetConnectedNode(n.OutFlowNode)
+	if childNode != nil {
+		calleeCode = childNode.GetCode(&arrowFunctions)
+	}
+
+	return fmt.Sprintf(`c.addEventListener('click', (event) => { this.%sX=event.offsetX;this.%sY=event.offsetY; %s %s }, false);`, n.VarName, n.VarName, arrowFunctions, calleeCode)
+}
+
+func (n *NodeOnCanvasClick) HasInputWithID(id int) bool {
+	return false
+}
+
 type NodeOnStart struct {
 	OutFlowNode int
 
@@ -205,6 +228,34 @@ func (n *NodeRandomNumber) GetCode(arrowFuncs *string) string {
 }
 
 func (n *NodeRandomNumber) HasInputWithID(id int) bool {
+	return id == n.ResConn
+}
+
+type NodeAbsNumber struct {
+	CodeGraph *CodeGraph
+
+	Value float32
+	Conn  int
+
+	ResConn int
+}
+
+func (n *NodeAbsNumber) GetCode(arrowFuncs *string) string {
+	var val string
+
+	if n.Conn == -1 {
+		val = fmt.Sprintf("%f", n.Value)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.Conn)
+		if childNode != nil {
+			val = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	return fmt.Sprintf(`Math.abs(%s)`, val)
+}
+
+func (n *NodeAbsNumber) HasInputWithID(id int) bool {
 	return id == n.ResConn
 }
 
@@ -387,5 +438,127 @@ func (n *NodeDrawRectangle) GetCode(arrowFuncs *string) string {
 }
 
 func (n *NodeDrawRectangle) HasInputWithID(id int) bool {
+	return id == n.FlowInput
+}
+
+type NodeDrawLine struct {
+	CodeGraph *CodeGraph
+
+	FlowInput int
+
+	ValueX float32
+	ValueY float32
+	ValueW float32
+	ValueH float32
+	ConnX  int
+	ConnY  int
+	ConnW  int
+	ConnH  int
+}
+
+func (n *NodeDrawLine) GetCode(arrowFuncs *string) string {
+	var valX string
+	var valY string
+	var valW string
+	var valH string
+
+	funcName := "DrawRect" + n.CodeGraph.GetNextFuncName()
+
+	if n.ConnX == -1 {
+		valX = fmt.Sprintf("%f", n.ValueX)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnX)
+		if childNode != nil {
+			valX = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnY == -1 {
+		valY = fmt.Sprintf("%f", n.ValueY)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnY)
+		if childNode != nil {
+			valY = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnW == -1 {
+		valW = fmt.Sprintf("%f", n.ValueW)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnW)
+		if childNode != nil {
+			valW = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnH == -1 {
+		valH = fmt.Sprintf("%f", n.ValueH)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnH)
+		if childNode != nil {
+			valH = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	*arrowFuncs += fmt.Sprintf(`%s=()=>{ let x=%s; let y=%s; let w=%s; let h=%s; this.CANVAS_CONTEXT.beginPath(); this.CANVAS_CONTEXT.moveTo(x, y);this.CANVAS_CONTEXT.lineTo(w, h); this.CANVAS_CONTEXT.stroke();};`, funcName, valX, valY, valW, valH)
+	return fmt.Sprintf(`%s()`, funcName)
+}
+
+func (n *NodeDrawLine) HasInputWithID(id int) bool {
+	return id == n.FlowInput
+}
+
+type NodeDrawCircle struct {
+	CodeGraph *CodeGraph
+
+	FlowInput int
+
+	ValueX float32
+	ValueY float32
+	ValueR float32
+	ConnX  int
+	ConnY  int
+	ConnR  int
+}
+
+func (n *NodeDrawCircle) GetCode(arrowFuncs *string) string {
+	var valX string
+	var valY string
+	var valR string
+
+	funcName := "DrawCircle" + n.CodeGraph.GetNextFuncName()
+
+	if n.ConnX == -1 {
+		valX = fmt.Sprintf("%f", n.ValueX)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnX)
+		if childNode != nil {
+			valX = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnY == -1 {
+		valY = fmt.Sprintf("%f", n.ValueY)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnY)
+		if childNode != nil {
+			valY = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ConnR == -1 {
+		valR = fmt.Sprintf("%f", n.ValueR)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ConnR)
+		if childNode != nil {
+			valR = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	*arrowFuncs += fmt.Sprintf(`%s=()=>{ let x=%s; let y=%s; let r=%s; this.CANVAS_CONTEXT.beginPath(); this.CANVAS_CONTEXT.arc(x, y, r, 0, 2 * Math.PI); this.CANVAS_CONTEXT.stroke(); };`, funcName, valX, valY, valR)
+	return fmt.Sprintf(`%s()`, funcName)
+}
+
+func (n *NodeDrawCircle) HasInputWithID(id int) bool {
 	return id == n.FlowInput
 }

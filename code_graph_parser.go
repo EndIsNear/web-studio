@@ -83,6 +83,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 		switch nodeType.Name {
 		case "On click":
 			c.parseOnClick(element, idsMap)
+		case "On Canvas click":
+			c.parseOnCanvasClick(element, idsMap)
 		case "On start":
 			c.parseOnStart(element, idsMap)
 		case "On timer":
@@ -93,6 +95,8 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseWriteNumVar(element, idsMap)
 		case "Random num":
 			c.parseRandomNum(element, idsMap)
+		case "Absolute num":
+			c.parseAbsNum(element, idsMap)
 		case "Operators":
 			c.parseNumOperation(element, idsMap)
 		case "If/Else":
@@ -105,6 +109,10 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseFillRect(element, idsMap, "Draw")
 		case "Clear rectangle":
 			c.parseFillRect(element, idsMap, "Clear")
+		case "Draw line":
+			c.parseDrawLine(element, idsMap)
+		case "Draw circle":
+			c.parseDrawCircle(element, idsMap)
 		default:
 			return errors.New("unknown node type while CodeGraph unmarshal")
 		}
@@ -217,6 +225,38 @@ func (c *CodeGraph) parseOnClick(bytes json.RawMessage, idsMap map[string]int) e
 	node := NodeOnClick{MethodName: val, OutFlowNode: id, CodeGraph: c}
 	c.Nodes = append(c.Nodes, &node)
 	c.MethodsNodes = append(c.MethodsNodes, &node)
+
+	return nil
+}
+
+func (c *CodeGraph) parseOnCanvasClick(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, id, err := getIfaceAtIndex(ifaces, 0, "Output", idsMap)
+	if err != nil {
+		return err
+	}
+
+	_, idX, err := getIfaceAtIndex(ifaces, 1, "X", idsMap)
+	if err != nil {
+		return err
+	}
+
+	_, idY, err := getIfaceAtIndex(ifaces, 2, "Y", idsMap)
+	if err != nil {
+		return err
+	}
+
+	node := NodeOnCanvasClick{VarName: "ON_CLICK_", OutFlowNode: id, CodeGraph: c}
+	c.Nodes = append(c.Nodes, &node)
+	c.CreatedNodes = append(c.CreatedNodes, &node)
+
+	c.Nodes = append(c.Nodes, &NodeReadNumber{VarName: "ON_CLICK_X", ResConn: idX, CodeGraph: c})
+	c.Nodes = append(c.Nodes, &NodeReadNumber{VarName: "ON_CLICK_Y", ResConn: idY, CodeGraph: c})
 
 	return nil
 }
@@ -358,6 +398,36 @@ func (c *CodeGraph) parseRandomNum(bytes json.RawMessage, idsMap map[string]int)
 		ConnFrom:  aID,
 		ValTo:     float32(bValF),
 		ConnTo:    bID,
+		ResConn:   resID,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseAbsNum(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	valS, id, err := getIfaceAtIndex(ifaces, 0, "Input", idsMap)
+	if err != nil {
+		return err
+	}
+	valF, err := strconv.ParseFloat(valS, 32)
+	if err != nil {
+		valF = 0.0
+	}
+
+	_, resID, err := getIfaceAtIndex(ifaces, 1, "Result", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.Nodes = append(c.Nodes, &NodeAbsNumber{
+		CodeGraph: c,
+		Value:     float32(valF),
+		Conn:      id,
 		ResConn:   resID,
 	})
 	return nil
@@ -614,6 +684,121 @@ func (c *CodeGraph) parseFillRect(bytes json.RawMessage, idsMap map[string]int, 
 		ConnW:     wID,
 		ConnH:     hID,
 		Operation: operation,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseDrawLine(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, flowId, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+
+	xValS, xID, err := getIfaceAtIndex(ifaces, 1, "From X", idsMap)
+	if err != nil {
+		return err
+	}
+	xValF, err := strconv.ParseFloat(xValS, 32)
+	if err != nil {
+		xValF = 0.0
+	}
+
+	yValS, yID, err := getIfaceAtIndex(ifaces, 2, "From Y", idsMap)
+	if err != nil {
+		return err
+	}
+	yValF, err := strconv.ParseFloat(yValS, 32)
+	if err != nil {
+		yValF = 0.0
+	}
+
+	wValS, wID, err := getIfaceAtIndex(ifaces, 3, "To X", idsMap)
+	if err != nil {
+		return err
+	}
+	wValF, err := strconv.ParseFloat(wValS, 32)
+	if err != nil {
+		wValF = 0.0
+	}
+
+	hValS, hID, err := getIfaceAtIndex(ifaces, 4, "To Y", idsMap)
+	if err != nil {
+		return err
+	}
+	hValF, err := strconv.ParseFloat(hValS, 32)
+	if err != nil {
+		hValF = 0.0
+	}
+
+	c.Nodes = append(c.Nodes, &NodeDrawLine{
+		CodeGraph: c,
+		FlowInput: flowId,
+		ValueX:    float32(xValF),
+		ValueY:    float32(yValF),
+		ValueW:    float32(wValF),
+		ValueH:    float32(hValF),
+		ConnX:     xID,
+		ConnY:     yID,
+		ConnW:     wID,
+		ConnH:     hID,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseDrawCircle(bytes json.RawMessage, idsMap map[string]int) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, flowId, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+
+	xValS, xID, err := getIfaceAtIndex(ifaces, 1, "X", idsMap)
+	if err != nil {
+		return err
+	}
+	xValF, err := strconv.ParseFloat(xValS, 32)
+	if err != nil {
+		xValF = 0.0
+	}
+
+	yValS, yID, err := getIfaceAtIndex(ifaces, 2, "Y", idsMap)
+	if err != nil {
+		return err
+	}
+	yValF, err := strconv.ParseFloat(yValS, 32)
+	if err != nil {
+		yValF = 0.0
+	}
+
+	rValS, rID, err := getIfaceAtIndex(ifaces, 3, "Radius", idsMap)
+	if err != nil {
+		return err
+	}
+	rValF, err := strconv.ParseFloat(rValS, 32)
+	if err != nil {
+		rValF = 0.0
+	}
+
+	c.Nodes = append(c.Nodes, &NodeDrawCircle{
+		CodeGraph: c,
+		FlowInput: flowId,
+		ValueX:    float32(xValF),
+		ValueY:    float32(yValF),
+		ValueR:    float32(rValF),
+		ConnX:     xID,
+		ConnY:     yID,
+		ConnR:     rID,
 	})
 	return nil
 }

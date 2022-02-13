@@ -29,6 +29,8 @@ function InitNodeEditor() {
     // Flow nodes
     const onClickNode = new BaklavaJS.Core.NodeBuilder("On click").addOption("Button ID", "InputOption").addOutputInterface("Output", {type: "flow"}).build();
     editor.registerNodeType("On click", onClickNode, "Flows");
+    const onCanvasClickNode = new BaklavaJS.Core.NodeBuilder("On Canvas click").addOutputInterface("Output", {type: "flow"}).addOutputInterface("X", {type: "int"}).addOutputInterface("Y", {type: "int"}).build();
+    editor.registerNodeType("On Canvas click", onCanvasClickNode, "Flows");
     const onStart = new BaklavaJS.Core.NodeBuilder("On start").addOutputInterface("Output", {type: "flow"}).build();
     editor.registerNodeType("On start", onStart, "Flows");
     const timer = new BaklavaJS.Core.NodeBuilder("On timer").addOption("Interval", "IntegerOption", "1000").addOutputInterface("Output", {type: "flow"}).build();
@@ -47,9 +49,11 @@ function InitNodeEditor() {
     editor.registerNodeType("Read num", readInt, "Number");
     const writeInt = new BaklavaJS.Core.NodeBuilder("Write num").addOption("Variable Name", "InputOption").addInputInterface("Input Flow", "", "", {type: "flow"}).addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
     editor.registerNodeType("Write num", writeInt, "Number");
-
     const randInt = new BaklavaJS.Core.NodeBuilder("Random num").addInputInterface("From", "NumberOption", "0", {type: "int"}).addInputInterface("To", "NumberOption", "10", {type: "int"}).addOutputInterface("Output", {type: "int"}).build();
     editor.registerNodeType("Random num", randInt, "Number");
+    const absInt = new BaklavaJS.Core.NodeBuilder("Absolute num").addInputInterface("Input", "NumberOption", "0", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    editor.registerNodeType("Absolute num", absInt, "Number");
+
 
     const opInt = new BaklavaJS.Core.NodeBuilder("Operators")
     .addOption("Operator", "SelectOption", "Add(+)", undefined, { items: ["Add(+)", "Subtract(-)", "Multiply(*)", "Devide(/)", "Modulus(%)"]})
@@ -66,10 +70,27 @@ function InitNodeEditor() {
     // Draw nodes
     const drawRect = new BaklavaJS.Core.NodeBuilder("Draw rectangle")
     .addInputInterface("Input Flow", "", "", {type: "flow"})
+    .addOption("Color", "InputOption", "#000000")
     .addInputInterface("X", "NumberOption", "", {type: "int"}).addInputInterface("Y", "NumberOption", "", {type: "int"})
     .addInputInterface("Width", "NumberOption", "", {type: "int"}).addInputInterface("Height", "NumberOption", "", {type: "int"})
     .build();
     editor.registerNodeType("Draw rectangle", drawRect, "Drawing");
+
+    const drawLine = new BaklavaJS.Core.NodeBuilder("Draw line")
+    .addInputInterface("Input Flow", "", "", {type: "flow"})
+    .addOption("Color", "InputOption", "#000000")
+    .addInputInterface("From X", "NumberOption", "", {type: "int"}).addInputInterface("From Y", "NumberOption", "", {type: "int"})
+    .addInputInterface("To X", "NumberOption", "", {type: "int"}).addInputInterface("To Y", "NumberOption", "", {type: "int"})
+    .build();
+    editor.registerNodeType("Draw line", drawLine, "Drawing");
+
+    const drawCircle = new BaklavaJS.Core.NodeBuilder("Draw circle")
+    .addInputInterface("Input Flow", "", "", {type: "flow"})
+    .addOption("Color", "InputOption", "#000000")
+    .addInputInterface("X", "NumberOption", "", {type: "int"}).addInputInterface("Y", "NumberOption", "", {type: "int"})
+    .addInputInterface("Radius", "NumberOption", "", {type: "int"})
+    .build();
+    editor.registerNodeType("Draw circle", drawCircle, "Drawing");
 
     const clearRect = new BaklavaJS.Core.NodeBuilder("Clear rectangle")
     .addInputInterface("Input Flow", "", "", {type: "flow"})
@@ -77,9 +98,6 @@ function InitNodeEditor() {
     .addInputInterface("Width", "NumberOption", "", {type: "int"}).addInputInterface("Height", "NumberOption", "", {type: "int"})
     .build();
     editor.registerNodeType("Clear rectangle", clearRect, "Drawing");
-
-    // BOOL
-    //"AND(&&)", "OR(||)"
 }
 
 function handleOnMessage(evt) {
