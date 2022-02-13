@@ -300,9 +300,55 @@ func (n *NodeCompareNumbers) HasInputWithID(id int) bool {
 	return id == n.ResConn
 }
 
+type NodeTrigonometryFunc struct {
+	CodeGraph *CodeGraph
+
+	Value    float32
+	Conn     int
+	Function string
+
+	ResConn int
+}
+
+func (n *NodeTrigonometryFunc) GetCode(arrowFuncs *string) string {
+	var val string
+
+	if n.Conn == -1 {
+		val = fmt.Sprintf("%f", n.Value)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.Conn)
+		if childNode != nil {
+			val = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	return fmt.Sprintf(`Math.%s(%s * Math.PI / 180)`, n.Function, val)
+}
+
+func (n *NodeTrigonometryFunc) HasInputWithID(id int) bool {
+	return id == n.ResConn
+}
+
 ///////////////////////
 // Number Array
 ///////////////////////
+
+type NodeInitArr struct {
+	CodeGraph *CodeGraph
+
+	VarName string
+	Value   string
+
+	ResConn int
+}
+
+func (n *NodeInitArr) GetCode(arrowFuncs *string) string {
+	return fmt.Sprintf(`this.%s=[%s]`, n.VarName, n.Value)
+}
+
+func (n *NodeInitArr) HasInputWithID(id int) bool {
+	return id == n.ResConn
+}
 
 type NodeReadArrSize struct {
 	CodeGraph *CodeGraph

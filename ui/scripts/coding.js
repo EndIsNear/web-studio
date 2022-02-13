@@ -56,6 +56,12 @@ function InitNodeEditor() {
     const absInt = new BaklavaJS.Core.NodeBuilder("Absolute num").addInputInterface("Input", "NumberOption", "0", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
     editor.registerNodeType("Absolute num", absInt, "Number");
 
+    const sinDeg = new BaklavaJS.Core.NodeBuilder("Sinus").addInputInterface("Input", "NumberOption", "0", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    editor.registerNodeType("Sinus", sinDeg, "Number");
+    const cosDeg = new BaklavaJS.Core.NodeBuilder("Cosinus").addInputInterface("Input", "NumberOption", "0", {type: "int"}).addOutputInterface("Result", {type: "int"}).build();
+    editor.registerNodeType("Cosinus", cosDeg, "Number");
+
+
 
     const opInt = new BaklavaJS.Core.NodeBuilder("Operators")
     .addOption("Operator", "SelectOption", "Add(+)", undefined, { items: ["Add(+)", "Subtract(-)", "Multiply(*)", "Devide(/)", "Modulus(%)"]})
@@ -70,6 +76,8 @@ function InitNodeEditor() {
     editor.registerNodeType("Compare num", compInt, "Number");
 
     // Number Array nodes
+    const initArr = new BaklavaJS.Core.NodeBuilder("Init array").addInputInterface("Input Flow", "", "", {type: "flow"}).addOption("Array Var Name", "InputOption").addOption("Comma separated nums", "InputOption").build();
+    editor.registerNodeType("Init array", initArr, "Number Array");
     const readArrSize = new BaklavaJS.Core.NodeBuilder("Read array size").addOption("Array Var Name", "InputOption").addOutputInterface("Output", {type: "int"}).build();
     editor.registerNodeType("Read array size", readArrSize, "Number Array");
     const readArrInt = new BaklavaJS.Core.NodeBuilder("Read array num").addOption("Array Var Name", "InputOption").addInputInterface("Index", "NumberOption", "0", {type: "int"}).addOutputInterface("Output", {type: "int"}).build();

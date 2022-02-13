@@ -97,8 +97,14 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseRandomNum(element, idsMap)
 		case "Absolute num":
 			c.parseAbsNum(element, idsMap)
+		case "Sinus":
+			c.parseTrigonometryFunc(element, idsMap, "sin")
+		case "Cosinus":
+			c.parseTrigonometryFunc(element, idsMap, "cos")
 		case "Operators":
 			c.parseNumOperation(element, idsMap)
+		case "Init array":
+			c.parseInitArray(element, idsMap)
 		case "Read array size":
 			c.parseArrSize(element, idsMap)
 		case "Read array num":
@@ -443,6 +449,37 @@ func (c *CodeGraph) parseAbsNum(bytes json.RawMessage, idsMap map[string]int) er
 	return nil
 }
 
+func (c *CodeGraph) parseTrigonometryFunc(bytes json.RawMessage, idsMap map[string]int, funcName string) error {
+	_, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	valS, id, err := getIfaceAtIndex(ifaces, 0, "Input", idsMap)
+	if err != nil {
+		return err
+	}
+	valF, err := strconv.ParseFloat(valS, 32)
+	if err != nil {
+		valF = 0.0
+	}
+
+	_, resID, err := getIfaceAtIndex(ifaces, 1, "Result", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.Nodes = append(c.Nodes, &NodeTrigonometryFunc{
+		CodeGraph: c,
+		Value:     float32(valF),
+		Conn:      id,
+		Function:  funcName,
+		ResConn:   resID,
+	})
+	return nil
+}
+
 func (c *CodeGraph) parseNumOperation(bytes json.RawMessage, idsMap map[string]int) error {
 	opts, ifaces, err := getOptsIfaces(bytes)
 	if err != nil {
@@ -567,6 +604,38 @@ func (c *CodeGraph) parseNumComparison(bytes json.RawMessage, idsMap map[string]
 		ConnB:     bID,
 		ResConn:   resID,
 		Operator:  op,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseInitArray(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Array Var Name")
+	if err != nil {
+		return err
+	}
+
+	_, val2, err := getOptAtIndex(opts, 1, "Comma separated nums")
+	if err != nil {
+		return err
+	}
+
+	_, id, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.ArrVariables[val] = true
+	c.Nodes = append(c.Nodes, &NodeInitArr{
+		VarName:   val,
+		Value:     val2,
+		ResConn:   id,
+		CodeGraph: c,
 	})
 	return nil
 }
