@@ -15,6 +15,7 @@ type CodeGraph struct {
 	MethodsNodes []GraphNode
 	CreatedNodes []GraphNode
 	NumVariables map[string]bool
+	ArrVariables map[string]bool
 
 	Connections []GraphConnection
 
@@ -23,6 +24,7 @@ type CodeGraph struct {
 
 func (c *CodeGraph) Init() {
 	c.NumVariables = make(map[string]bool)
+	c.ArrVariables = make(map[string]bool)
 }
 
 func (c *CodeGraph) Build(initCanvas bool) string {
@@ -53,6 +55,10 @@ func (c *CodeGraph) BuildVars(initCanvas bool) string {
 
 	for key := range c.NumVariables {
 		result += fmt.Sprintf(`%s: 0, `, key)
+	}
+
+	for key := range c.ArrVariables {
+		result += fmt.Sprintf(`%s: [], `, key)
 	}
 
 	return result

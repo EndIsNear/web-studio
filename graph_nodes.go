@@ -300,6 +300,131 @@ func (n *NodeCompareNumbers) HasInputWithID(id int) bool {
 	return id == n.ResConn
 }
 
+///////////////////////
+// Number Array
+///////////////////////
+
+type NodeReadArrSize struct {
+	CodeGraph *CodeGraph
+
+	VarName string
+
+	ResConn int
+}
+
+func (n *NodeReadArrSize) GetCode(arrowFuncs *string) string {
+	return fmt.Sprintf(`this.%s.length`, n.VarName)
+}
+
+func (n *NodeReadArrSize) HasInputWithID(id int) bool {
+	return id == n.ResConn
+}
+
+type NodeReadArrNumber struct {
+	CodeGraph *CodeGraph
+
+	VarName   string
+	Index     int
+	IndexConn int
+
+	ResConn int
+}
+
+func (n *NodeReadArrNumber) GetCode(arrowFuncs *string) string {
+	idxCode := ""
+	if n.IndexConn == -1 {
+		idxCode = fmt.Sprintf("%d", n.Index)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.IndexConn)
+		if childNode != nil {
+			idxCode = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	return fmt.Sprintf(`this.%s[%s]`, n.VarName, idxCode)
+}
+
+func (n *NodeReadArrNumber) HasInputWithID(id int) bool {
+	return id == n.ResConn
+}
+
+type NodeWriteArrNumber struct {
+	CodeGraph *CodeGraph
+
+	VarName string
+
+	Index     int
+	IndexConn int
+	Value     float32
+	ValueConn int
+
+	FlowInput int
+}
+
+func (n *NodeWriteArrNumber) GetCode(arrowFuncs *string) string {
+	funcName := "WriteArrNum" + n.CodeGraph.GetNextFuncName()
+	idxCode := ""
+	valCode := ""
+
+	if n.IndexConn == -1 {
+		idxCode = fmt.Sprintf("%d", n.Index)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.IndexConn)
+		if childNode != nil {
+			idxCode = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	if n.ValueConn == -1 {
+		valCode = fmt.Sprintf("%f", n.Value)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ValueConn)
+		if childNode != nil {
+			valCode = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	*arrowFuncs += fmt.Sprintf(`%s=()=>{this.%s[%s]=%s};`, funcName, n.VarName, idxCode, valCode)
+	return fmt.Sprintf(`%s()`, funcName)
+}
+
+func (n *NodeWriteArrNumber) HasInputWithID(id int) bool {
+	return id == n.FlowInput
+}
+
+type NodePushArrNumber struct {
+	CodeGraph *CodeGraph
+
+	VarName string
+
+	Value     float32
+	ValueConn int
+
+	FlowInput int
+}
+
+func (n *NodePushArrNumber) GetCode(arrowFuncs *string) string {
+	valCode := ""
+	if n.ValueConn == -1 {
+		valCode = fmt.Sprintf("%f", n.Value)
+	} else {
+		childNode := n.CodeGraph.GetConnectedNode(n.ValueConn)
+		if childNode != nil {
+			valCode = childNode.GetCode(arrowFuncs)
+		}
+	}
+
+	return fmt.Sprintf(`this.%s.push(%s);`, n.VarName, valCode)
+}
+
+func (n *NodePushArrNumber) HasInputWithID(id int) bool {
+	return id == n.FlowInput
+}
+
+///////////////////////
+// Flow
+///////////////////////
+
 type NodeIfElse struct {
 	CodeGraph *CodeGraph
 
@@ -369,7 +494,7 @@ func (n *NodeForLoop) GetCode(arrowFuncs *string) string {
 		loopCode = childNode.GetCode(arrowFuncs)
 	}
 
-	funcName := "IfElse" + n.CodeGraph.GetNextFuncName()
+	funcName := "Loop" + n.CodeGraph.GetNextFuncName()
 	*arrowFuncs += fmt.Sprintf(`%s=()=>{for(%s;%s;) { %s }};`, funcName, initCode, condCode, loopCode)
 	return fmt.Sprintf(`%s()`, funcName)
 }

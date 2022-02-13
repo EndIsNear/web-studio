@@ -69,6 +69,16 @@ function InitNodeEditor() {
     .addOutputInterface("Result", {type: "bool"}).build();
     editor.registerNodeType("Compare num", compInt, "Number");
 
+    // Number Array nodes
+    const readArrSize = new BaklavaJS.Core.NodeBuilder("Read array size").addOption("Array Var Name", "InputOption").addOutputInterface("Output", {type: "int"}).build();
+    editor.registerNodeType("Read array size", readArrSize, "Number Array");
+    const readArrInt = new BaklavaJS.Core.NodeBuilder("Read array num").addOption("Array Var Name", "InputOption").addInputInterface("Index", "NumberOption", "0", {type: "int"}).addOutputInterface("Output", {type: "int"}).build();
+    editor.registerNodeType("Read array num", readArrInt, "Number Array");
+    const writeArrInt = new BaklavaJS.Core.NodeBuilder("Write array num").addOption("Array Var Name", "InputOption").addInputInterface("Index", "NumberOption", "0", {type: "int"}).addInputInterface("Input Flow", "", "", {type: "flow"}).addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
+    editor.registerNodeType("Write array num", writeArrInt, "Number Array");
+    const pushArrInt = new BaklavaJS.Core.NodeBuilder("Push back num").addOption("Array Var Name", "InputOption").addInputInterface("Input Flow", "", "", {type: "flow"}).addInputInterface("Input", "NumberOption", "", {type: "int"}).build();
+    editor.registerNodeType("Push back num", pushArrInt, "Number Array");
+
     // Draw nodes
     const drawRect = new BaklavaJS.Core.NodeBuilder("Draw rectangle")
     .addInputInterface("Input Flow", "", "", {type: "flow"})

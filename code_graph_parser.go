@@ -99,6 +99,14 @@ func (c *CodeGraph) parseNodes(bytes []byte, idsMap map[string]int) error {
 			c.parseAbsNum(element, idsMap)
 		case "Operators":
 			c.parseNumOperation(element, idsMap)
+		case "Read array size":
+			c.parseArrSize(element, idsMap)
+		case "Read array num":
+			c.parseReadArrNum(element, idsMap)
+		case "Write array num":
+			c.parseWriteArrNum(element, idsMap)
+		case "Push back num":
+			c.parseArrPushBack(element, idsMap)
 		case "If/Else":
 			c.parseIfElse(element, idsMap)
 		case "For loop":
@@ -559,6 +567,150 @@ func (c *CodeGraph) parseNumComparison(bytes json.RawMessage, idsMap map[string]
 		ConnB:     bID,
 		ResConn:   resID,
 		Operator:  op,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseArrSize(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Array Var Name")
+	if err != nil {
+		return err
+	}
+
+	_, id, err := getIfaceAtIndex(ifaces, 0, "Output", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.ArrVariables[val] = true
+	c.Nodes = append(c.Nodes, &NodeReadArrSize{VarName: val, ResConn: id, CodeGraph: c})
+	return nil
+}
+
+func (c *CodeGraph) parseReadArrNum(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Array Var Name")
+	if err != nil {
+		return err
+	}
+
+	idxS, idIdx, err := getIfaceAtIndex(ifaces, 0, "Index", idsMap)
+	if err != nil {
+		return err
+	}
+	idxInt, err := strconv.Atoi(idxS)
+	if err != nil {
+		idxInt = 0
+	}
+
+	_, idRes, err := getIfaceAtIndex(ifaces, 1, "Output", idsMap)
+	if err != nil {
+		return err
+	}
+
+	c.ArrVariables[val] = true
+	c.Nodes = append(c.Nodes, &NodeReadArrNumber{
+		VarName:   val,
+		Index:     idxInt,
+		IndexConn: idIdx,
+		ResConn:   idRes,
+		CodeGraph: c,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseWriteArrNum(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Array Var Name")
+	if err != nil {
+		return err
+	}
+
+	idxS, idIdx, err := getIfaceAtIndex(ifaces, 0, "Index", idsMap)
+	if err != nil {
+		return err
+	}
+	idxInt, err := strconv.Atoi(idxS)
+	if err != nil {
+		idxInt = 0
+	}
+
+	_, idInFlow, err := getIfaceAtIndex(ifaces, 1, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+
+	inVal, idInput, err := getIfaceAtIndex(ifaces, 2, "Input", idsMap)
+	if err != nil {
+		return err
+	}
+	inValF, err := strconv.ParseFloat(inVal, 32)
+	if err != nil {
+		inValF = 0.0
+	}
+
+	c.ArrVariables[val] = true
+	c.Nodes = append(c.Nodes, &NodeWriteArrNumber{
+		CodeGraph: c,
+		VarName:   val,
+		Index:     idxInt,
+		IndexConn: idIdx,
+		Value:     float32(inValF),
+		ValueConn: idInput,
+		FlowInput: idInFlow,
+	})
+	return nil
+}
+
+func (c *CodeGraph) parseArrPushBack(bytes json.RawMessage, idsMap map[string]int) error {
+	opts, ifaces, err := getOptsIfaces(bytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, val, err := getOptAtIndex(opts, 0, "Array Var Name")
+	if err != nil {
+		return err
+	}
+
+	_, flowId, err := getIfaceAtIndex(ifaces, 0, "Input Flow", idsMap)
+	if err != nil {
+		return err
+	}
+
+	inVal, id, err := getIfaceAtIndex(ifaces, 1, "Input", idsMap)
+	if err != nil {
+		return err
+	}
+	inValF, err := strconv.ParseFloat(inVal, 32)
+	if err != nil {
+		inValF = 0.0
+	}
+
+	c.ArrVariables[val] = true
+	c.Nodes = append(c.Nodes, &NodePushArrNumber{
+		VarName:   val,
+		Value:     float32(inValF),
+		ValueConn: id,
+		FlowInput: flowId,
+		CodeGraph: c,
 	})
 	return nil
 }
