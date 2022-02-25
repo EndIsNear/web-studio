@@ -28,23 +28,23 @@ function InitNodeEditor() {
 
     // Flow nodes
     const onClickNode = new BaklavaJS.Core.NodeBuilder("On click").addOption("Button ID", "InputOption").addOutputInterface("Output", {type: "flow"}).build();
-    editor.registerNodeType("On click", onClickNode, "Flows");
+    editor.registerNodeType("On click", onClickNode, "Flow");
     const onCanvasClickNode = new BaklavaJS.Core.NodeBuilder("On Canvas click").addOutputInterface("Output", {type: "flow"}).addOutputInterface("X", {type: "int"}).addOutputInterface("Y", {type: "int"}).build();
-    editor.registerNodeType("On Canvas click", onCanvasClickNode, "Flows");
+    editor.registerNodeType("On Canvas click", onCanvasClickNode, "Flow");
     const onStart = new BaklavaJS.Core.NodeBuilder("On start").addOutputInterface("Output", {type: "flow"}).build();
-    editor.registerNodeType("On start", onStart, "Flows");
+    editor.registerNodeType("On start", onStart, "Flow");
     const timer = new BaklavaJS.Core.NodeBuilder("On timer").addOption("Interval", "IntegerOption", "1000").addOutputInterface("Output", {type: "flow"}).build();
-    editor.registerNodeType("On timer", timer, "Flows");
+    editor.registerNodeType("On timer", timer, "Flow");
 
 
     const splitFlow = new BaklavaJS.Core.NodeBuilder("Split flow").addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("Output 1", {type: "flow"}).addOutputInterface("Output 2", {type: "flow"}).build();
-    editor.registerNodeType("Split flow", splitFlow, "Flows");
+    editor.registerNodeType("Split flow", splitFlow, "Flow");
 
     // Flow nodes
     const ifNode = new BaklavaJS.Core.NodeBuilder("If/Else").addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("True", {type: "flow"}).addOutputInterface("False", {type: "flow"}).addInputInterface("Condition", "", "", {type: "bool"}).build();
-    editor.registerNodeType("If/Else", ifNode, "Logic");
+    editor.registerNodeType("If/Else", ifNode, "Flow");
     const forNode = new BaklavaJS.Core.NodeBuilder("For loop").addInputInterface("Input Flow", "", "", {type: "flow"}).addOutputInterface("Initialization", {type: "flow"}).addOutputInterface("Loop flow", {type: "flow"}).addInputInterface("Condition", "", "", {type: "bool"}).build();
-    editor.registerNodeType("For loop", forNode, "Logic");
+    editor.registerNodeType("For loop", forNode, "Flow");
 
     // Number nodes
     const readInt = new BaklavaJS.Core.NodeBuilder("Read num").addOption("Variable Name", "InputOption").addOutputInterface("Output", {type: "int"}).build();
